@@ -65,14 +65,14 @@
 
         @keyframes screenShake {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            20% { transform: translate(-10px, 5px) rotate(-1.3deg); }
-            40% { transform: translate(10px, -5px) rotate(1.3deg); }
-            60% { transform: translate(-7px, -3px) rotate(-0.6deg); }
-            80% { transform: translate(7px, 3px) rotate(0.6deg); }
+            20% { transform: translate(calc(-10px * var(--shake-strength, 0.65)), calc(5px * var(--shake-strength, 0.65))) rotate(calc(-1.3deg * var(--shake-strength, 0.65))); }
+            40% { transform: translate(calc(10px * var(--shake-strength, 0.65)), calc(-5px * var(--shake-strength, 0.65))) rotate(calc(1.3deg * var(--shake-strength, 0.65))); }
+            60% { transform: translate(calc(-7px * var(--shake-strength, 0.65)), calc(-3px * var(--shake-strength, 0.65))) rotate(calc(-0.6deg * var(--shake-strength, 0.65))); }
+            80% { transform: translate(calc(7px * var(--shake-strength, 0.65)), calc(3px * var(--shake-strength, 0.65))) rotate(calc(0.6deg * var(--shake-strength, 0.65))); }
         }
 
         .shake-anim {
-            animation: screenShake 0.28s ease-in-out;
+            animation: screenShake 0.24s ease-in-out;
         }
 
         @keyframes popFeedback {
@@ -1101,6 +1101,8 @@
 
         const sfx = new SoundEffects();
 
+        // 타격감 개선 패치: 기존 PASS/SLAP 규칙과 점수는 그대로 유지.
+        // 보스 출현 목표 점수만 높여 콤보를 충분히 쌓을 시간을 확보.
         // -------------------- 5. 스테이지 및 보스 설정 --------------------
         const STAGES = [
             {
@@ -1109,7 +1111,7 @@
                 badge: "STAGE 1: 남수원중",
                 themeLabel: "☀️ 아침 등굣길 정문",
                 themeKey: "MORNING",
-                bossScoreThreshold: 2400, // 스테이지 내 획득 점수 기준 (상향)
+                bossScoreThreshold: 7500, // 콤보를 충분히 쌓을 수 있도록 보스 출현을 늦춤
                 bossName: "남수원중 핏불 김태풍",
                 bossHairColor: "#1E293B",
                 timeLimit: 30.0,
@@ -1124,7 +1126,7 @@
                 badge: "STAGE 2: 매원중",
                 themeLabel: "🏫 점심시간 실내 복도",
                 themeKey: "HALLWAY",
-                bossScoreThreshold: 3600,
+                bossScoreThreshold: 9500, // 스테이지 2 보스 출현 완화
                 bossName: "매원중 스키니 강백호",
                 bossHairColor: "#DC2626",
                 timeLimit: 30.0,
@@ -1139,7 +1141,7 @@
                 badge: "STAGE 3: 호매실중",
                 themeLabel: "🌇 하굣길 노을 교문",
                 themeKey: "SUNSET",
-                bossScoreThreshold: 4800,
+                bossScoreThreshold: 12000, // 스테이지 3 보스 출현 완화
                 bossName: "호매실중 레깅스 마왕",
                 bossHairColor: "#FACC15",
                 timeLimit: 30.0,
@@ -2472,7 +2474,7 @@
 
             state.score += dmgScore;
             state.totalSlaps++;
-            state.hitStopTimer = 0.06;
+            state.hitStopTimer = 0.075; // 보스 타격 순간 강조
             triggerScreenShake();
             spawnShockwave();
 
@@ -2654,7 +2656,7 @@
                     sfx.playSlap(state.combo);
                     state.totalSlaps++;
                     state.slapHandAnim = 1.0;
-                    state.hitStopTimer = 0.045;
+                    state.hitStopTimer = 0.065; // 짧은 타격 정지로 손맛 강화
                     spawnShockwave();
                     triggerScreenShake();
                     state.knockbackVx = 1750;
@@ -2738,8 +2740,11 @@
             }, 240);
         }
 
-        function triggerScreenShake() {
+        function triggerScreenShake(intensity = null) {
             if (!gameContainer) return;
+            // 성공 타격은 콤보가 높을수록 조금 더 강하게, 실패는 기본 강도로.
+            const comboScale = intensity == null ? 0.55 : Math.min(1.0, 0.42 + intensity * 0.025);
+            gameContainer.style.setProperty("--shake-strength", comboScale.toFixed(2));
             gameContainer.classList.remove("shake-anim");
             void gameContainer.offsetWidth;
             gameContainer.classList.add("shake-anim");
