@@ -527,7 +527,7 @@
          * ============================================================================
          */
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // -------------------- 0. DOM 요소 참조 --------------------
@@ -636,7 +636,8 @@
         }
 
         // -------------------- 3. Firebase 초기화 및 실시간 TOP 10 랭킹 매니저 --------------------
-        const appId = typeof __app_id !== "undefined" ? __app_id : "default-app-id";
+        // Firebase 프로젝트의 Firestore 랭킹 경로 구분자
+        const appId = "namsuwon1zin";
         let db = null;
         let auth = null;
         let currentUser = null;
@@ -650,30 +651,24 @@
             nicknameInputEl.value = savedNickname;
         }
 
+        // Firebase 웹 앱 설정: Firebase Console > 프로젝트 설정 > 내 앱에서 발급된 값
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAOUP-u_p7xlN841XoWf6T_HRlQDO-g7w",
+            authDomain: "namsuwon1zin.firebaseapp.com",
+            projectId: "namsuwon1zin",
+            storageBucket: "namsuwon1zin.firebasestorage.app",
+            messagingSenderId: "579986511862",
+            appId: "1:579986511862:web:5d7866ece18019e77499d7"
+        };
+
         async function initFirebaseRanking() {
             try {
-                if (typeof __firebase_config === "undefined" || !__firebase_config) {
-                    updateRankingStatusFallback();
-                    return;
-                }
-                const firebaseConfig = typeof __firebase_config === "string"
-                    ? JSON.parse(__firebase_config)
-                    : __firebase_config;
-
-                if (!firebaseConfig || !firebaseConfig.apiKey) {
-                    updateRankingStatusFallback();
-                    return;
-                }
-
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                // 별도 회원가입 없이 익명 인증으로 랭킹 등록 권한을 확보합니다.
+                await signInAnonymously(auth);
 
                 onAuthStateChanged(auth, (user) => {
                     currentUser = user;
@@ -684,6 +679,10 @@
             } catch (err) {
                 console.error("Firebase 초기화 중 오류:", err);
                 updateRankingStatusFallback();
+                const countEl = document.getElementById("totalRankersCount");
+                if (countEl) {
+                    countEl.textContent = "랭킹 서버 연결 실패 (콘솔 확인)";
+                }
             }
         }
 
@@ -1110,7 +1109,7 @@
                 badge: "STAGE 1: 남수원중",
                 themeLabel: "☀️ 아침 등굣길 정문",
                 themeKey: "MORNING",
-                bossScoreThreshold: 1500, // 스테이지 내 획득 점수 기준
+                bossScoreThreshold: 2400, // 스테이지 내 획득 점수 기준 (상향)
                 bossName: "남수원중 핏불 김태풍",
                 bossHairColor: "#1E293B",
                 timeLimit: 30.0,
@@ -1125,7 +1124,7 @@
                 badge: "STAGE 2: 매원중",
                 themeLabel: "🏫 점심시간 실내 복도",
                 themeKey: "HALLWAY",
-                bossScoreThreshold: 2400,
+                bossScoreThreshold: 3600,
                 bossName: "매원중 스키니 강백호",
                 bossHairColor: "#DC2626",
                 timeLimit: 30.0,
@@ -1140,7 +1139,7 @@
                 badge: "STAGE 3: 호매실중",
                 themeLabel: "🌇 하굣길 노을 교문",
                 themeKey: "SUNSET",
-                bossScoreThreshold: 3200,
+                bossScoreThreshold: 4800,
                 bossName: "호매실중 레깅스 마왕",
                 bossHairColor: "#FACC15",
                 timeLimit: 30.0,
@@ -1366,6 +1365,85 @@
             }
         }
 
+        // -------------------- 콤보 관중 연출 --------------------
+        // 5콤보부터 5콤보 단위로 관중이 한 명씩 늘어납니다.
+        // 최대 8명까지 표시하며, 콤보가 끊기면 관중도 함께 사라집니다.
+        function drawComboSpectators(w, floorY) {
+            const spectatorCount = Math.min(8, Math.floor(state.combo / 5));
+            if (spectatorCount <= 0) return;
+
+            const positions = [0.12, 0.88, 0.23, 0.77, 0.36, 0.64, 0.05, 0.95];
+            const shirtColors = ["#F9A8D4", "#93C5FD", "#C4B5FD", "#FDE68A", "#A7F3D0", "#FDA4AF", "#BFDBFE", "#DDD6FE"];
+
+            ctx.save();
+            for (let i = 0; i < spectatorCount; i++) {
+                const x = w * positions[i];
+                const y = floorY - 5 - (i % 2) * 3;
+                const scale = Math.max(0.72, Math.min(1, w / 390));
+                const bob = Math.sin(performance.now() / 150 + i * 1.7) * 2.2;
+
+                ctx.save();
+                ctx.translate(x, y + bob);
+                ctx.scale(scale, scale);
+
+                // 머리카락과 얼굴
+                ctx.fillStyle = i % 2 === 0 ? "#3F2A24" : "#5B4636";
+                ctx.beginPath();
+                ctx.arc(0, -43, 10, Math.PI, Math.PI * 2);
+                ctx.lineTo(10, -39);
+                ctx.arc(0, -42, 10, 0, Math.PI);
+                ctx.fill();
+                ctx.fillStyle = "#F8C9A5";
+                ctx.beginPath();
+                ctx.arc(0, -40, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = "#1F2937";
+                ctx.lineWidth = 1.3;
+                ctx.stroke();
+
+                // 교복 상의
+                ctx.fillStyle = shirtColors[i];
+                ctx.strokeStyle = "#1F2937";
+                ctx.lineWidth = 1.8;
+                ctx.beginPath();
+                ctx.moveTo(-10, -30);
+                ctx.lineTo(10, -30);
+                ctx.lineTo(14, -7);
+                ctx.lineTo(-14, -7);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // 환호하는 양팔
+                ctx.strokeStyle = "#F8C9A5";
+                ctx.lineWidth = 4;
+                ctx.lineCap = "round";
+                ctx.beginPath();
+                ctx.moveTo(-9, -27);
+                ctx.lineTo(-17, -39);
+                ctx.moveTo(9, -27);
+                ctx.lineTo(17, -39);
+                ctx.stroke();
+
+                // 작은 환호 표시
+                ctx.fillStyle = "#DC2626";
+                ctx.font = "bold 13px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(i % 2 === 0 ? "!" : "★", 0, -57);
+                ctx.restore();
+            }
+
+            // 관중 수를 콤보와 연결해 한눈에 알아볼 수 있도록 표시
+            ctx.fillStyle = "rgba(15, 23, 42, 0.78)";
+            drawRoundRect(ctx, 8, floorY - 31, 83, 22, 8);
+            ctx.fill();
+            ctx.fillStyle = "#FDE68A";
+            ctx.font = "bold 11px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText(`관중 ${spectatorCount}명`, 49.5, floorY - 16);
+            ctx.restore();
+        }
+
         function drawSchoolBackground(w, h) {
             const stage = STAGES[Math.min(state.stageIndex, STAGES.length - 1)] || STAGES[0];
             const floorY = h * 0.76;
@@ -1417,6 +1495,9 @@
                 ctx.fillStyle = "#334155";
             }
             ctx.fillRect(0, floorY, w, h - floorY);
+
+            // 콤보가 쌓일수록 구경하는 학생들이 배경에 합류
+            drawComboSpectators(w, floorY);
 
             ctx.strokeStyle = "#1E293B";
             ctx.lineWidth = 3;
