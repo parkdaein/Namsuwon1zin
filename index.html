@@ -522,7 +522,7 @@
          * 1. 열중쉬어 자세(뒷짐 진 코믹 포즈) 학생 일러스트 적용
          * 2. 스테이지별 일정 점수 도달 시 '황금 쫄바지 보스' 등장
          *    - 패스 선택 시: 뒤돌아 걸어가며 스테이지 즉시 종료
-         *    - 싸대기 선택 시: 보스가 앞으로 걸어나와 얼굴 클로즈업 3연타 타이밍 배틀!
+         *    - 싸대기 선택 시: 보스가 앞으로 걸어나와 표적 중앙 타이밍 3연타 (PERFECT/GREAT/GOOD/MISS)!
          *      (1타: 싸대기 손바닥 -> 2타: 죽빵 주먹 -> 3타: 어퍼컷 주먹 + 우스꽝스러운 피격 얼굴)
          * ============================================================================
          */
@@ -2116,13 +2116,13 @@
             ctx.lineWidth = 4;
             ctx.setLineDash([8, 6]);
             ctx.beginPath();
-            ctx.arc(0, 0, 44, 0, Math.PI * 2);
+            ctx.arc(0, 0, 30, 0, Math.PI * 2);
             ctx.stroke();
             ctx.setLineDash([]);
 
             ctx.fillStyle = "rgba(250, 204, 21, 0.22)";
             ctx.beginPath();
-            ctx.arc(0, 0, 44, 0, Math.PI * 2);
+            ctx.arc(0, 0, 30, 0, Math.PI * 2);
             ctx.fill();
 
             ctx.fillStyle = "#FEF08A";
@@ -2132,7 +2132,7 @@
             ctx.restore();
 
             // (B) 위아래로 움직이는 실제 손바닥 / 주먹 아이콘
-            const isAligned = Math.abs(offsetY) <= 24;
+            const isAligned = Math.abs(offsetY) <= 16;
             ctx.save();
             ctx.translate(targetX, targetY + offsetY);
 
@@ -2140,7 +2140,7 @@
             if (isAligned) {
                 ctx.fillStyle = "rgba(239, 68, 68, 0.55)";
                 ctx.beginPath();
-                ctx.arc(0, 0, 50, 0, Math.PI * 2);
+                ctx.arc(0, 0, 36, 0, Math.PI * 2);
                 ctx.fill();
             }
 
@@ -2441,14 +2441,14 @@
             });
 
             if (step === 0) {
-                inst.textContent = "1타 [싸대기]: 점선 손바닥과 겹칠 때 터치!";
-                btnTitle.textContent = "✋ 풀스윙 싸대기 발사!!";
+                inst.textContent = "1타 [싸대기]: 움직이는 손이 노란 표적 중앙에 겹치는 순간!";
+                btnTitle.textContent = "✋ 타이밍 맞춰 싸대기!!";
             } else if (step === 1) {
-                inst.textContent = "2타 [죽빵]: 중앙 점선 주먹과 겹칠 때 터치!";
-                btnTitle.textContent = "👊 안면 죽빵 발사!!";
+                inst.textContent = "2타 [죽빵]: 주먹이 표적 중앙을 통과하는 순간!";
+                btnTitle.textContent = "👊 정확히 죽빵!!";
             } else {
-                inst.textContent = "3타 [어퍼컷]: 턱 아래 주먹과 겹칠 때 터치!";
-                btnTitle.textContent = "🔥 승룡 어퍼컷 발사!!";
+                inst.textContent = "3타 [어퍼컷]: 마지막! 중앙을 찰나에 맞춰 입력!";
+                btnTitle.textContent = "🔥 최후의 어퍼컷!!";
             }
         }
 
@@ -2460,61 +2460,82 @@
             const offsetY = Math.sin(b.oscPhase) * 95;
             const absDiff = Math.abs(offsetY);
 
-            // 타이밍 판정 (PERFECT: <= 26px, GREAT: <= 52px, GOOD: > 52px)
-            let grade = "GOOD";
-            let dmgScore = 400;
-            if (absDiff <= 26) {
+            // 타이밍 판정: 화면에 보이는 표적 중앙을 통과할 때만 높은 점수.
+            // 모바일도 고려해 PERFECT는 매우 짧지만, GREAT/GOOD으로도 점수를 얻을 수 있게 구성.
+            let grade = "MISS";
+            let dmgScore = 0;
+            if (absDiff <= 16) {
                 grade = "PERFECT";
-                dmgScore = 1000;
+                dmgScore = 1500;
                 b.perfectCount++;
-            } else if (absDiff <= 52) {
+            } else if (absDiff <= 34) {
                 grade = "GREAT";
-                dmgScore = 650;
+                dmgScore = 850;
+                b.perfectCount = 0;
+            } else if (absDiff <= 58) {
+                grade = "GOOD";
+                dmgScore = 400;
+                b.perfectCount = 0;
+            } else {
+                // 빗맞으면 타격 대신 헛손질: 점수와 보스 피격 누적 없이 코믹 반응만.
+                b.perfectCount = 0;
             }
 
             state.score += dmgScore;
-            state.totalSlaps++;
-            state.hitStopTimer = 0.075; // 보스 타격 순간 강조
-            triggerScreenShake();
-            spawnShockwave();
+            if (grade !== "MISS") state.totalSlaps++;
+            state.hitStopTimer = grade === "PERFECT" ? 0.095 : grade === "MISS" ? 0.025 : 0.065;
+            if (grade !== "MISS") {
+                triggerScreenShake();
+                spawnShockwave();
+            }
 
-            // 타격 단계별 피격 표정 및 사운드 연출
-            if (b.comboStep === 0) {
-                sfx.playSlap(12);
+            // 판정에 따른 보스 리액션. MISS는 허공을 때리고 보스가 약 올리는 동작.
+            if (grade === "MISS") {
+                sfx.playWrong();
+                b.faceShakeX = b.comboStep % 2 === 0 ? 13 : -13;
+                b.faceShakeY = 7;
+                b.faceTilt = b.comboStep % 2 === 0 ? -0.10 : 0.10;
+                showFloatingFeedback(
+                    "💨 헛손질!!",
+                    ["보스가 몸을 쏙 피했다!", "허공에 풀스윙! 보스의 비웃음!", "아깝다! 타이밍이 늦었다!"][b.comboStep],
+                    "bg-gray-700 text-white"
+                );
+            } else if (b.comboStep === 0) {
+                sfx.playSlap(grade === "PERFECT" ? 14 : 9);
                 b.damageMarks.push("SLAP");
-                b.faceShakeX = 28;
-                b.faceTilt = 0.16;
+                b.faceShakeX = grade === "PERFECT" ? 34 : 22;
+                b.faceTilt = grade === "PERFECT" ? 0.22 : 0.13;
                 showFloatingFeedback(
                     grade === "PERFECT" ? "🌟 PERFECT 싸대기!!" : `💥 ${grade} 싸대기!`,
-                    `뺨에 선명한 손바닥 자국! (+${dmgScore}점)`,
+                    `뺨에 손바닥 자국! (+${dmgScore}점)`,
                     "bg-red-600 text-yellow-300"
                 );
             } else if (b.comboStep === 1) {
                 sfx.playHeavyPunch(false);
                 b.damageMarks.push("PUNCH");
-                b.faceShakeY = -26;
-                b.faceTilt = -0.18;
+                b.faceShakeY = grade === "PERFECT" ? -34 : -24;
+                b.faceTilt = grade === "PERFECT" ? -0.24 : -0.16;
                 showFloatingFeedback(
                     grade === "PERFECT" ? "🌟 PERFECT 안면 죽빵!!" : `👊 ${grade} 죽빵!`,
-                    `쌍코피 터지고 팬더눈 완성! (+${dmgScore}점)`,
+                    `팬더눈과 쌍코피 완성! (+${dmgScore}점)`,
                     "bg-orange-600 text-white"
                 );
             } else {
                 sfx.playHeavyPunch(true);
                 b.damageMarks.push("UPPERCUT");
-                b.faceShakeY = -48;
-                b.faceTilt = 0.35;
+                b.faceShakeY = grade === "PERFECT" ? -58 : -42;
+                b.faceTilt = grade === "PERFECT" ? 0.42 : 0.30;
 
-                // 3연타 모두 PERFECT 달성 시 보너스 2,000점!
+                // 3연타 모두 PERFECT 달성 시 보너스 3,000점!
                 let perfectBonusText = "";
                 if (b.perfectCount === 3) {
-                    state.score += 2000;
-                    perfectBonusText = " · 👑 3연타 올 퍼펙트 보너스 +2,000점!!";
+                    state.score += 3000;
+                    perfectBonusText = " · 👑 올 퍼펙트 +3,000점!!";
                 }
 
                 showFloatingFeedback(
                     grade === "PERFECT" ? "🚀 PERFECT 승룡 어퍼컷!!" : `🔥 ${grade} 어퍼컷!`,
-                    `보스 턱 돌아가고 영혼 가출! (+${dmgScore}점)${perfectBonusText}`,
+                    `턱이 돌아가고 영혼 가출! (+${dmgScore}점)${perfectBonusText}`,
                     "bg-purple-700 text-yellow-300"
                 );
             }
@@ -2538,7 +2559,9 @@
                         completeStage();
                     }, 750);
                 } else {
-                    b.oscPhase = -Math.PI / 2;
+                    // 다음 타는 리듬을 바꿔, 같은 타이밍을 반복 암기하지 못하게 방향을 교차.
+                    b.oscPhase = b.comboStep % 2 === 1 ? Math.PI / 2 : -Math.PI / 2;
+                    b.oscSpeed += 0.45;
                     updateBossStepGuideUI();
                     isProcessingAction = false;
                 }
