@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>남수원의 바지단속 - 전설의 교복 단속반장 킬러Z</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #0F172A;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .font-title {
+            font-family: 'Black Han Sans', sans-serif;
+        }
+
+        .font-comic {
+            font-family: 'Jua', sans-serif;
+        }
+
+        .comic-border {
+            border: 4px solid #000000;
+            box-shadow: 0 6px 0 #000000;
+        }
+
+        .comic-border-sm {
+            border: 3px solid #000000;
+            box-shadow: 0 3px 0 #000000;
+        }
+
+        .text-stroke {
+            -webkit-text-stroke: 2px #000000;
+            paint-order: stroke fill;
+            text-shadow: 0 4px 0 #000000;
+        }
+
+        .text-stroke-sm {
+            -webkit-text-stroke: 1.5px #000000;
+            paint-order: stroke fill;
+            text-shadow: 0 2px 0 #000000;
+        }
+
+        .btn-arcade {
+            transition: transform 0.08s ease, box-shadow 0.08s ease;
+        }
+
+        .btn-arcade:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #000000;
+        }
+
+        @keyframes screenShake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-8px, 4px) rotate(-1deg); }
+            40% { transform: translate(8px, -4px) rotate(1deg); }
+            60% { transform: translate(-6px, -3px) rotate(-0.5deg); }
+            80% { transform: translate(6px, 3px) rotate(0.5deg); }
+        }
+
+        .shake-anim {
+            animation: screenShake 0.28s ease-in-out;
+        }
+
+        @keyframes popFeedback {
+            0% { transform: scale(0.4) translateY(15px); opacity: 0; }
+            35% { transform: scale(1.12) translateY(-4px); opacity: 1; }
+            80% { transform: scale(1) translateY(0); opacity: 1; }
+            100% { transform: scale(0.95) translateY(-10px); opacity: 0; }
+        }
+
+        .slap-effect {
+            animation: popFeedback 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes urgentPulse {
+            0%, 100% { background-color: #FEF08A; }
+            50% { background-color: #FCA5A5; }
+        }
+
+        .urgent-timer {
+            animation: urgentPulse 0.6s infinite;
+        }
+
+        /* 10콤보 이상 킬러Z 피버(폭주) 모드 테두리 오라 */
+        @keyframes feverGlow {
+            0%, 100% {
+                box-shadow: inset 0 0 28px rgba(239, 68, 68, 0.85), 0 0 25px rgba(245, 158, 11, 0.8);
+                border-color: #EF4444;
+            }
+            50% {
+                box-shadow: inset 0 0 48px rgba(245, 158, 11, 0.95), 0 0 40px rgba(239, 68, 68, 0.95);
+                border-color: #FACC15;
+            }
+        }
+
+        .fever-mode {
+            animation: feverGlow 0.55s infinite alternate;
+        }
+
+        /* 중앙 콤보 카운터 팝 애니메이션 */
+        @keyframes comboBounce {
+            0% { transform: translate(-50%, 0) scale(0.5); opacity: 0.3; }
+            45% { transform: translate(-50%, -8px) scale(1.32); opacity: 1; }
+            100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+        }
+
+        .combo-pop {
+            animation: comboBounce 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 마일스톤(5/10/15/20콤보) 컷인 배너 */
+        @keyframes cutinSlide {
+            0% { transform: translateX(-120%) skewX(-12deg); opacity: 0; }
+            20% { transform: translateX(0%) skewX(-12deg); opacity: 1; }
+            80% { transform: translateX(0%) skewX(-12deg); opacity: 1; }
+            100% { transform: translateX(120%) skewX(-12deg); opacity: 0; }
+        }
+
+        .cutin-banner {
+            animation: cutinSlide 1.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* 오답 시 붉은 경고등 플래시 */
+        @keyframes penaltyFlash {
+            0% { opacity: 0.75; }
+            100% { opacity: 0; }
+        }
+
+        .penalty-flash {
+            animation: penaltyFlash 0.45s ease-out forwards;
+        }
+
+        /* 배경 하프톤 패턴 (웹툰 느낌) */
+        .halftone-bg {
+            background-image: radial-gradient(#00000022 2px, transparent 2px);
+            background-size: 16px 16px;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen flex items-center justify-center bg-slate-900">
+
+    <!-- 메인 게임 컨테이너 (모바일/데스크탑 최적화 비율) -->
+    <div id="gameContainer" class="relative w-full max-w-md h-full sm:h-[92vh] sm:max-h-[820px] bg-amber-100 sm:rounded-3xl comic-border overflow-hidden flex flex-col justify-between shadow-2xl">
+
+        <!-- ==================== 1. 상단 HUD (게임 진행 중 표시) ==================== -->
+        <header id="gameHud" class="hidden z-20 bg-yellow-300 border-b-4 border-black px-3 py-2 flex flex-col gap-1.5">
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5">
+                    <span id="stageBadge" class="bg-red-600 text-white font-comic text-xs sm:text-sm px-2.5 py-0.5 rounded-lg comic-border-sm">
+                        STAGE 1: 남수원중
+                    </span>
+                    <span id="quotaDisplay" class="bg-white text-black font-bold text-xs sm:text-sm px-2 py-0.5 rounded-lg border-2 border-black">
+                        목표: 0 / 14명
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                    <div id="comboBadge" class="hidden bg-orange-500 text-white font-title text-sm sm:text-base px-2 py-0.5 rounded-lg comic-border-sm">
+                        0 COMBO!
+                    </div>
+                    <div class="bg-black text-yellow-300 font-comic text-base sm:text-lg px-3 py-0.5 rounded-lg">
+                        <span id="scoreDisplay">0</span>점
+                    </div>
+                </div>
+            </div>
+
+            <!-- 30초 타이머 게이지 (선도부 선생님 접근) -->
+            <div class="w-full">
+                <div class="flex justify-between items-center text-[11px] sm:text-xs font-bold mb-0.5">
+                    <span id="teacherStatus" class="text-red-700">🚨 선도부 선생님 접근 중!</span>
+                    <span id="timeText" class="font-title text-sm text-black">30.0초</span>
+                </div>
+                <div class="relative w-full h-4 bg-gray-800 rounded-full border-2 border-black overflow-hidden">
+                    <div id="timerBar" class="h-full bg-gradient-to-r from-red-500 via-orange-400 to-green-400 transition-all duration-75" style="width: 100%;"></div>
+                    <span id="teacherIcon" class="absolute top-1/2 -translate-y-1/2 text-xs leading-none transition-all duration-75" style="left: 90%;">👮‍♂️</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ==================== 2. 중앙 캔버스 영역 ==================== -->
+        <main id="canvasWrapper" class="relative flex-1 w-full bg-gradient-to-b from-sky-200 via-amber-50 to-stone-200 overflow-hidden">
+            <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+            <!-- 기준선 안내 배너 -->
+            <div id="ruleBanner" class="hidden pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 z-10 bg-black/80 text-white font-comic text-xs px-3 py-1 rounded-full whitespace-nowrap">
+                기준: <span class="text-blue-300">7.8인치 초과 패스</span> / <span class="text-red-400">7.8인치 미만 싸대기</span>
+            </div>
+
+            <!-- 중앙 상단 역동적 콤보 카운터 & 피버 배지 -->
+            <div id="centerComboHud" class="hidden pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
+                <div id="feverBadge" class="hidden bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400 text-white font-title text-xs sm:text-sm px-3 py-0.5 rounded-full border-2 border-black shadow-md mb-1 tracking-wider whitespace-nowrap">
+                    🔥 킬러Z 폭주 모드 (점수 2배!) 🔥
+                </div>
+                <div id="centerComboText" class="font-title text-3xl sm:text-4xl text-yellow-300 text-stroke leading-none whitespace-nowrap">
+                    2 COMBO!
+                </div>
+            </div>
+
+            <!-- 콤보 마일스톤 각성 컷인 배너 (5, 10, 15, 20콤보) -->
+            <div id="cutinOverlay" class="pointer-events-none absolute top-20 inset-x-0 z-20 flex justify-center overflow-hidden"></div>
+
+            <!-- 판정 피드백 플로팅 오버레이 -->
+            <div id="feedbackOverlay" class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"></div>
+
+            <!-- 오답 시 선도부 경고 플래시 오버레이 -->
+            <div id="penaltyOverlay" class="hidden pointer-events-none absolute inset-0 z-20 bg-red-600/45 flex items-center justify-center">
+                <div class="bg-black/90 text-red-400 font-title text-2xl sm:text-3xl px-5 py-2 rounded-2xl border-4 border-red-500">
+                    🚨 선도부 경고! -2.0초 🚨
+                </div>
+            </div>
+
+            <!-- 터치 영역 가이드 (게임 중 직접 터치 존) -->
+            <div id="touchZones" class="hidden absolute inset-0 z-10 flex">
+                <div id="leftTouchZone" class="w-1/2 h-full cursor-pointer active:bg-blue-500/10 flex items-center justify-start pl-3">
+                    <span class="pointer-events-none opacity-25 font-title text-blue-800 text-xl">◀ PASS</span>
+                </div>
+                <div id="rightTouchZone" class="w-1/2 h-full cursor-pointer active:bg-red-500/10 flex items-center justify-end pr-3">
+                    <span class="pointer-events-none opacity-25 font-title text-red-800 text-xl">SLAP ▶</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- ==================== 3. 하단 조작 버튼 (게임 진행 중 표시) ==================== -->
+        <footer id="gameControls" class="hidden z-20 bg-stone-900 border-t-4 border-black p-3 grid grid-cols-2 gap-3">
+            <button id="btnPass" type="button" class="btn-arcade bg-blue-600 hover:bg-blue-500 text-white rounded-2xl py-3 px-2 comic-border-sm flex flex-col items-center justify-center">
+                <span class="font-title text-xl sm:text-2xl text-stroke-sm">👈 패스 (PASS)</span>
+                <span class="font-comic text-xs text-blue-100">7.8인치 초과 (정상 바지)</span>
+            </button>
+            <button id="btnSlap" type="button" class="btn-arcade bg-red-600 hover:bg-red-500 text-white rounded-2xl py-3 px-2 comic-border-sm flex flex-col items-center justify-center">
+                <span class="font-title text-xl sm:text-2xl text-stroke-sm">👉 싸대기 (SLAP)</span>
+                <span class="font-comic text-xs text-yellow-200">7.8인치 미만 (쫄바지 응징)</span>
+            </button>
+        </footer>
+
+        <!-- ==================== 4. 인트로 / 타이틀 화면 ==================== -->
+        <section id="titleScreen" class="absolute inset-0 z-30 bg-gradient-to-b from-yellow-400 via-amber-300 to-orange-400 halftone-bg flex flex-col items-center justify-between p-4 sm:p-5 text-center overflow-y-auto">
+            <div class="w-full flex justify-between items-center gap-2">
+                <span class="bg-black text-yellow-400 font-comic text-xs px-3 py-1 rounded-full">ARCADE ACTION</span>
+                <div class="flex items-center gap-1.5">
+                    <button id="btnOpenRankingFromTitle" type="button" class="btn-arcade bg-amber-950 text-yellow-300 font-comic text-xs px-3 py-1 rounded-full comic-border-sm">
+                        🏆 실시간 TOP 10
+                    </button>
+                    <button id="btnToggleSound" type="button" class="btn-arcade bg-white text-black font-comic text-xs px-3 py-1 rounded-full comic-border-sm">
+                        🔊 효과음 ON
+                    </button>
+                </div>
+            </div>
+
+            <!-- 타이틀 로고 & 킬러Z 캐릭터 일러스트 -->
+            <div class="my-auto flex flex-col items-center w-full py-2">
+                <div class="bg-red-600 text-white font-comic text-sm sm:text-base px-4 py-1 rounded-full comic-border-sm -rotate-2 mb-2">
+                    전설의 교복 단속반장 '킬러Z' 강림!
+                </div>
+                <h1 class="font-title text-5xl sm:text-6xl text-white text-stroke leading-tight tracking-tight mb-3">
+                    남수원의<br><span class="text-yellow-300">바지단속</span>
+                </h1>
+
+                <!-- 킬러Z SVG 일러스트 -->
+                <div class="w-32 h-32 sm:w-36 sm:h-36 bg-white rounded-full comic-border flex items-center justify-center mb-3 relative overflow-hidden shadow-xl">
+                    <svg viewBox="0 0 120 120" class="w-full h-full">
+                        <circle cx="60" cy="60" r="58" fill="#FEF08A"/>
+                        <!-- 얼굴 -->
+                        <circle cx="60" cy="64" r="34" fill="#FDBA74" stroke="#000" stroke-width="4"/>
+                        <!-- 머리띠 -->
+                        <rect x="26" y="42" width="68" height="11" rx="4" fill="#DC2626" stroke="#000" stroke-width="3"/>
+                        <text x="60" y="50" text-anchor="middle" fill="#FFF" font-size="8" font-weight="900">KILLER Z</text>
+                        <!-- 머리카락 -->
+                        <path d="M26 44 C26 20, 94 20, 94 44 Z" fill="#1E293B" stroke="#000" stroke-width="4"/>
+                        <!-- 선글라스 -->
+                        <polygon points="32,56 57,56 53,70 35,70" fill="#000"/>
+                        <polygon points="63,56 88,56 85,70 67,70" fill="#000"/>
+                        <line x1="57" y1="60" x2="63" y2="60" stroke="#000" stroke-width="4"/>
+                        <line x1="38" y1="59" x2="45" y2="67" stroke="#FFF" stroke-width="2"/>
+                        <line x1="69" y1="59" x2="76" y2="67" stroke="#FFF" stroke-width="2"/>
+                        <!-- 불타는 입 -->
+                        <path d="M46 80 Q60 92 74 80" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+                        <!-- 거대한 손바닥 -->
+                        <circle cx="96" cy="88" r="16" fill="#EF4444" stroke="#000" stroke-width="3.5"/>
+                        <text x="96" y="92" text-anchor="middle" fill="#FEF08A" font-size="11" font-weight="900">짝!</text>
+                    </svg>
+                </div>
+
+                <!-- 게임 규칙 요약 카드 -->
+                <div class="w-full bg-white rounded-2xl p-3 comic-border text-left space-y-1.5 mb-3">
+                    <p class="font-comic text-sm sm:text-base text-center text-red-600 border-b-2 border-dashed border-gray-300 pb-1">
+                        🔥 제한시간 30초! 10콤보 달성 시 '폭주 모드(점수 2배)' 발동!
+                    </p>
+                    <div class="grid grid-cols-2 gap-2 text-xs sm:text-sm font-bold">
+                        <div class="bg-blue-50 border-2 border-blue-500 rounded-xl p-2">
+                            <span class="text-blue-700 font-comic text-base block">👈 왼쪽 / 패스</span>
+                            바지통이 <span class="underline text-blue-700">7.8인치 초과</span>인 넉넉한 바지는 통과!
+                        </div>
+                        <div class="bg-red-50 border-2 border-red-500 rounded-xl p-2">
+                            <span class="text-red-700 font-comic text-base block">👉 오른쪽 / 싸대기</span>
+                            바지통이 <span class="underline text-red-700">7.8인치 미만</span>인 쫄바지는 응징!
+                        </div>
+                    </div>
+                    <p class="text-[11px] sm:text-xs text-gray-600 text-center">
+                        ※ 팁: 신발 크기와 발목 여유 공간을 눈썰미로 파악하세요! (키보드 ← / → 지원)
+                    </p>
+                </div>
+            </div>
+
+            <button id="btnStartGame" type="button" class="btn-arcade w-full bg-red-600 hover:bg-red-500 text-white font-title text-2xl sm:text-3xl py-3.5 rounded-2xl comic-border text-stroke-sm">
+                🚀 남수원중 단속 시작!
+            </button>
+        </section>
+
+        <!-- ==================== 5. 스테이지 전환 / 컷신 모달 ==================== -->
+        <section id="stageModal" class="hidden absolute inset-0 z-40 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-5 text-center">
+            <div class="w-full bg-yellow-300 rounded-3xl p-5 comic-border flex flex-col items-center">
+                <span id="modalBadge" class="bg-red-600 text-white font-comic text-xs sm:text-sm px-3 py-1 rounded-full comic-border-sm mb-2">
+                    남수원중 제압 완료!
+                </span>
+                <h2 id="modalTitle" class="font-title text-3xl sm:text-4xl text-white text-stroke mb-2">
+                    남수원중 단속 완료!
+                </h2>
+                <p id="modalStory" class="font-comic text-sm sm:text-base text-gray-900 bg-white rounded-2xl p-3 comic-border-sm mb-4 w-full leading-relaxed">
+                    다음 학교로 진격합니다!
+                </p>
+
+                <div class="w-full grid grid-cols-3 gap-2 bg-amber-100 rounded-2xl p-3 comic-border-sm mb-4 text-center">
+                    <div>
+                        <span class="block text-[11px] font-bold text-gray-600">단속 완료</span>
+                        <span id="statCaught" class="font-title text-lg text-black">0명</span>
+                    </div>
+                    <div class="border-x-2 border-black/15">
+                        <span class="block text-[11px] font-bold text-gray-600">누적 정확도</span>
+                        <span id="statAccuracy" class="font-title text-lg text-blue-600">100%</span>
+                    </div>
+                    <div>
+                        <span class="block text-[11px] font-bold text-gray-600">현재 점수</span>
+                        <span id="statScore" class="font-title text-lg text-red-600">0점</span>
+                    </div>
+                </div>
+
+                <button id="btnNextStage" type="button" class="btn-arcade w-full bg-red-600 hover:bg-red-500 text-white font-title text-xl sm:text-2xl py-3.5 rounded-2xl comic-border-sm text-stroke-sm">
+                    🔥 매원중 침공하기 ▶
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================== 6. 최종 클리어 / 게임 오버 & 실시간 랭킹 등록 화면 ==================== -->
+        <section id="endModal" class="hidden absolute inset-0 z-50 bg-slate-900/95 flex flex-col items-center justify-center p-4 sm:p-5 text-center overflow-y-auto">
+            <div id="endCard" class="w-full bg-amber-300 rounded-3xl p-4 sm:p-5 comic-border flex flex-col items-center my-auto">
+                <div id="endEmoji" class="text-4xl sm:text-5xl mb-1">👑</div>
+                <span id="endBadge" class="bg-red-600 text-white font-comic text-xs sm:text-sm px-3 py-1 rounded-full comic-border-sm mb-1.5">
+                    전 학교 제패 성공!
+                </span>
+                <h2 id="endTitle" class="font-title text-3xl sm:text-4xl text-white text-stroke mb-1.5">
+                    수원 일대 교복 평정!
+                </h2>
+                <p id="endDesc" class="font-comic text-sm sm:text-base text-gray-900 bg-white rounded-2xl p-2.5 comic-border-sm mb-3 w-full">
+                    남수원중, 매원중, 호매실중의 모든 쫄바지가 킬러Z의 손바닥 아래 정화되었습니다!
+                </p>
+
+                <!-- 최종 통계 -->
+                <div class="w-full bg-white rounded-2xl p-3 comic-border-sm mb-3 space-y-1.5 text-xs sm:text-sm font-bold">
+                    <div class="flex justify-between border-b pb-1">
+                        <span class="text-gray-600">최종 점수</span>
+                        <span id="finalScore" class="font-title text-lg sm:text-xl text-red-600">0점</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-1">
+                        <span class="text-gray-600">도달 학교 / 응징 수</span>
+                        <span id="finalStageAndSlaps" class="text-black">호매실중 / 0명</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-1">
+                        <span class="text-gray-600">최고 콤보</span>
+                        <span id="finalCombo" class="text-orange-600">0 COMBO</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">단속 정확도</span>
+                        <span id="finalAccuracy" class="text-blue-600">0%</span>
+                    </div>
+                </div>
+
+                <!-- 실시간 명예의 전당 점수 등록 폼 -->
+                <div id="rankingRegisterBox" class="w-full bg-yellow-100 rounded-2xl p-3 comic-border-sm mb-3">
+                    <div class="font-comic text-sm text-amber-950 mb-1.5 flex items-center justify-between">
+                        <span>🏆 명예의 전당 기록 등록</span>
+                        <span id="registerStatusTag" class="text-xs text-red-600 font-bold">닉네임 입력 후 등록</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <input id="nicknameInput" type="text" maxlength="12" placeholder="내 닉네임 입력 (최대 12자)" class="flex-1 min-w-0 bg-white border-2 border-black rounded-xl px-3 py-2 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <button id="btnSubmitRank" type="button" class="btn-arcade bg-red-600 hover:bg-red-500 text-white font-comic text-sm sm:text-base px-4 py-2 rounded-xl comic-border-sm whitespace-nowrap">
+                            기록 등록
+                        </button>
+                    </div>
+                </div>
+
+                <div class="w-full grid grid-cols-2 gap-2.5">
+                    <button id="btnViewRankingEnd" type="button" class="btn-arcade bg-amber-950 hover:bg-amber-900 text-yellow-300 font-title text-lg sm:text-xl py-3 rounded-2xl comic-border-sm">
+                        🏆 실시간 TOP 10
+                    </button>
+                    <button id="btnRestart" type="button" class="btn-arcade bg-yellow-400 hover:bg-yellow-300 text-black font-title text-lg sm:text-xl py-3 rounded-2xl comic-border-sm">
+                        🔄 다시 도전
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 7. 실시간 명예의 전당 (TOP 10 표시 / DB 무제한 저장) ==================== -->
+        <section id="rankingModal" class="hidden absolute inset-0 z-50 bg-slate-950/95 flex flex-col p-4 sm:p-5">
+            <div class="w-full h-full bg-amber-50 rounded-3xl p-4 comic-border flex flex-col justify-between overflow-hidden">
+                <!-- 상단 헤더 -->
+                <div class="flex items-center justify-between border-b-4 border-black pb-2.5 mb-2">
+                    <div>
+                        <span class="bg-red-600 text-white font-comic text-xs px-2 py-0.5 rounded-md">LIVE TOP 10</span>
+                        <h2 class="font-title text-2xl sm:text-3xl text-black mt-0.5">🏆 수원 바지단속 TOP 10</h2>
+                    </div>
+                    <button id="btnCloseRanking" type="button" class="btn-arcade bg-white text-black font-title text-lg px-3 py-1 rounded-xl comic-border-sm">
+                        ✕ 닫기
+                    </button>
+                </div>
+
+                <!-- 전체 등록 인원 & 내 최고 순위 배너 -->
+                <div class="flex items-center justify-between bg-yellow-300 px-3 py-2 rounded-xl comic-border-sm mb-2 text-xs sm:text-sm font-bold">
+                    <span id="totalRankersCount">전체 참여자: 불러오는 중...</span>
+                    <span id="myBestRankBadge" class="text-red-700">내 순위: -</span>
+                </div>
+
+                <!-- 상위 10명 랭킹 리스트 -->
+                <div id="rankingListContainer" class="flex-1 overflow-y-auto space-y-2 pr-1">
+                    <div class="text-center py-10 font-comic text-gray-500 text-base">
+                        실시간 랭킹 데이터를 불러오는 중입니다...
+                    </div>
+                </div>
+
+                <!-- 하단 안내 및 새로고침 -->
+                <div class="pt-2.5 mt-2 border-t-2 border-dashed border-gray-300 flex items-center justify-between text-xs font-bold text-gray-600">
+                    <span>※ 모든 기록은 영구 저장되며 상위 10명이 공개됩니다.</span>
+                    <button id="btnRefreshRanking" type="button" class="btn-arcade bg-stone-800 text-white px-3 py-1.5 rounded-lg font-comic">
+                        🔄 새로고침
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script type="module">
+        /**
+         * ============================================================================
+         * 남수원의 바지단속 (Namsuwon's Pants Inspection) - Complete Edition
+         * 1. 중복 코드 및 DOM 참조 오류 완전 수정
+         * 2. Firebase Firestore 100개 이상 무제한 저장 + 실시간 TOP 10 노출
+         * 3. 유저 입력 닉네임 검증 및 저장
+         * ============================================================================
+         */
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // -------------------- 0. DOM 요소 참조 --------------------
+        const gameContainer = document.getElementById("gameContainer");
+        const canvasWrapper = document.getElementById("canvasWrapper");
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas ? canvas.getContext("2d") : null;
+
+        const gameHud = document.getElementById("gameHud");
+        const ruleBanner = document.getElementById("ruleBanner");
+        const gameControls = document.getElementById("gameControls");
+        const titleScreen = document.getElementById("titleScreen");
+        const stageModal = document.getElementById("stageModal");
+        const endModal = document.getElementById("endModal");
+        const touchZones = document.getElementById("touchZones");
+        const feedbackOverlay = document.getElementById("feedbackOverlay");
+        const cutinOverlay = document.getElementById("cutinOverlay");
+        const penaltyOverlay = document.getElementById("penaltyOverlay");
+        const centerComboHud = document.getElementById("centerComboHud");
+        const centerComboText = document.getElementById("centerComboText");
+        const feverBadge = document.getElementById("feverBadge");
+
+        // -------------------- 1. Firebase 초기화 및 실시간 TOP 10 랭킹 매니저 --------------------
+        const appId = typeof __app_id !== "undefined" ? __app_id : "default-app-id";
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let allRankings = []; // DB에 저장된 전체 랭킹(100개 이상) 보관
+        let latestInsertedDocId = null;
+        let unsubscribeRankings = null;
+
+        // 마지막으로 사용한 닉네임 복원
+        const savedNickname = localStorage.getItem("namsuwon_last_nickname");
+        const nicknameInputEl = document.getElementById("nicknameInput");
+        if (savedNickname && nicknameInputEl) {
+            nicknameInputEl.value = savedNickname;
+        }
+
+        async function initFirebaseRanking() {
+            try {
+                if (typeof __firebase_config === "undefined" || !__firebase_config) {
+                    updateRankingStatusFallback();
+                    return;
+                }
+                const firebaseConfig = typeof __firebase_config === "string"
+                    ? JSON.parse(__firebase_config)
+                    : __firebase_config;
+
+                if (!firebaseConfig || !firebaseConfig.apiKey) {
+                    updateRankingStatusFallback();
+                    return;
+                }
+
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    currentUser = user;
+                    if (user) {
+                        subscribeToRankings();
+                    }
+                });
+            } catch (err) {
+                console.error("Firebase 초기화 중 오류:", err);
+                updateRankingStatusFallback();
+            }
+        }
+
+        function updateRankingStatusFallback() {
+            const countEl = document.getElementById("totalRankersCount");
+            if (countEl) countEl.textContent = "오프라인 모드 (연결 대기 중)";
+        }
+
+        // Firestore에는 100개 이상 전체 데이터를 무제한 저장/유지하고, 정렬 후 상위 10개만 화면에 표시
+        function subscribeToRankings() {
+            if (!db || !currentUser) return;
+            if (unsubscribeRankings) {
+                unsubscribeRankings();
+                unsubscribeRankings = null;
+            }
+
+            const rankingsCol = collection(db, "artifacts", appId, "public", "data", "namsuwon_rankings");
+
+            unsubscribeRankings = onSnapshot(
+                rankingsCol,
+                (snapshot) => {
+                    const list = [];
+                    snapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        list.push({
+                            id: docSnap.id,
+                            nickname: data.nickname || "이름없는단속반",
+                            score: Number(data.score) || 0,
+                            maxCombo: Number(data.maxCombo) || 0,
+                            stageReached: data.stageReached || "남수원중",
+                            uid: data.uid || "",
+                            createdAtMs: Number(data.createdAtMs) || 0
+                        });
+                    });
+
+                    // 점수 내림차순 정렬 (동점 시 최대 콤보 내림차순 -> 먼저 달성한 순)
+                    list.sort((a, b) => {
+                        if (b.score !== a.score) return b.score - a.score;
+                        if (b.maxCombo !== a.maxCombo) return b.maxCombo - a.maxCombo;
+                        return a.createdAtMs - b.createdAtMs;
+                    });
+
+                    allRankings = list;
+                    renderRankingBoard();
+                },
+                (error) => {
+                    console.error("랭킹 실시간 구독 오류:", error);
+                    const container = document.getElementById("rankingListContainer");
+                    if (container) {
+                        container.innerHTML = `<div class="text-center py-8 font-comic text-red-600">랭킹을 불러오는 중 잠시 문제가 발생했습니다. 새로고침을 눌러주세요.</div>`;
+                    }
+                }
+            );
+        }
+
+        async function submitRankingScore() {
+            const nicknameInput = document.getElementById("nicknameInput");
+            const btnSubmit = document.getElementById("btnSubmitRank");
+            const statusTag = document.getElementById("registerStatusTag");
+            if (!nicknameInput || !btnSubmit || !statusTag) return;
+
+            const nickname = nicknameInput.value.trim();
+
+            // 유저가 직접 닉네임을 입력하도록 검증
+            if (!nickname) {
+                statusTag.textContent = "⚠️ 닉네임을 먼저 입력해주세요!";
+                statusTag.className = "text-xs text-red-600 font-bold";
+                nicknameInput.focus();
+                return;
+            }
+
+            if (!db || !currentUser) {
+                statusTag.textContent = "서버 연결 중... 잠시 후 다시 시도해주세요";
+                return;
+            }
+
+            if (state.hasSubmittedRank) {
+                statusTag.textContent = "이미 등록 완료되었습니다!";
+                return;
+            }
+
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "등록 중...";
+
+            try {
+                // 입력한 닉네임 로컬 기억
+                localStorage.setItem("namsuwon_last_nickname", nickname);
+
+                const rankingsCol = collection(db, "artifacts", appId, "public", "data", "namsuwon_rankings");
+                const safeStageObj = STAGES[Math.min(state.stageIndex, STAGES.length - 1)] || STAGES[0];
+                const reachedSchool = state.isAllCleared
+                    ? "호매실중(완전정복)"
+                    : safeStageObj.school;
+
+                const docRef = await addDoc(rankingsCol, {
+                    nickname,
+                    score: state.score,
+                    maxCombo: state.maxCombo,
+                    stageReached: reachedSchool,
+                    uid: currentUser.uid,
+                    createdAtMs: Date.now(),
+                    createdAt: serverTimestamp()
+                });
+
+                latestInsertedDocId = docRef.id;
+                state.hasSubmittedRank = true;
+                statusTag.textContent = `✅ '${nickname}' 등록 완료!`;
+                statusTag.className = "text-xs text-green-700 font-bold";
+                btnSubmit.textContent = "등록 완료";
+                btnSubmit.className = "bg-green-600 text-white font-comic text-sm px-4 py-2 rounded-xl comic-border-sm";
+
+                // 등록 후 바로 랭킹 모달 열어서 TOP 10 및 본인 전체 순위 확인
+                openRankingModal();
+            } catch (err) {
+                console.error("점수 등록 실패:", err);
+                statusTag.textContent = "등록 실패! 다시 시도해주세요";
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = "기록 등록";
+            }
+        }
+
+        function renderRankingBoard() {
+            const container = document.getElementById("rankingListContainer");
+            const totalCountEl = document.getElementById("totalRankersCount");
+            const myBestBadge = document.getElementById("myBestRankBadge");
+            if (!container || !totalCountEl || !myBestBadge) return;
+
+            // 전체 등록 개수는 100개 이상 모두 카운트 표시
+            totalCountEl.textContent = `전체 등록 기록: 총 ${allRankings.length.toLocaleString()}명`;
+
+            if (allRankings.length === 0) {
+                myBestBadge.textContent = "내 순위: 첫 기록의 주인공이 되어보세요!";
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-2xl comic-border-sm font-comic text-gray-600">
+                        아직 등록된 단속반원이 없습니다.<br>첫 번째로 1위에 이름을 올려보세요!
+                    </div>
+                `;
+                return;
+            }
+
+            // 전체 랭킹(100위 밖 포함)에서 내 최고 순위 계산
+            let myBestRank = -1;
+            if (currentUser) {
+                const idx = allRankings.findIndex(
+                    (item) => (latestInsertedDocId && item.id === latestInsertedDocId) || item.uid === currentUser.uid
+                );
+                if (idx !== -1) myBestRank = idx + 1;
+            }
+            myBestBadge.textContent = myBestRank !== -1 ? `내 전체 순위: ${myBestRank}위` : "내 순위: 미등록";
+
+            // 화면에는 상위 10개(TOP 10)만 표시
+            const top10Rankings = allRankings.slice(0, 10);
+            const fragment = document.createDocumentFragment();
+
+            top10Rankings.forEach((item, index) => {
+                const rank = index + 1;
+                const isMine = (latestInsertedDocId && item.id === latestInsertedDocId) || (currentUser && item.uid === currentUser.uid);
+
+                let medal = `${rank}위`;
+                let rowBg = isMine ? "bg-yellow-200 border-red-600" : "bg-white border-black";
+                if (rank === 1) {
+                    medal = "🥇 1위";
+                    if (!isMine) rowBg = "bg-amber-100 border-amber-600";
+                } else if (rank === 2) {
+                    medal = "🥈 2위";
+                } else if (rank === 3) {
+                    medal = "🥉 3위";
+                }
+
+                const card = document.createElement("div");
+                card.id = `rank-row-${item.id}`;
+                card.className = `flex items-center justify-between px-3 py-2.5 rounded-xl border-2 ${rowBg} shadow-sm`;
+                card.innerHTML = `
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="font-title text-base sm:text-lg ${rank <= 3 ? "text-red-600" : "text-gray-800"} whitespace-nowrap">
+                            ${medal}
+                        </span>
+                        <div class="min-w-0 text-left">
+                            <div class="font-bold text-sm sm:text-base text-gray-900 truncate flex items-center gap-1">
+                                <span>${escapeHtml(item.nickname)}</span>
+                                ${isMine ? '<span class="bg-red-600 text-white text-[10px] px-1.5 py-0.2 rounded">ME</span>' : ""}
+                            </div>
+                            <div class="text-[11px] text-gray-500 font-bold">
+                                ${escapeHtml(item.stageReached)} · 최고 ${item.maxCombo}콤보
+                            </div>
+                        </div>
+                    </div>
+                    <div class="font-title text-lg sm:text-xl text-red-600 whitespace-nowrap ml-2">
+                        ${item.score.toLocaleString()}점
+                    </div>
+                `;
+                fragment.appendChild(card);
+            });
+
+            container.innerHTML = "";
+            container.appendChild(fragment);
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        function openRankingModal() {
+            renderRankingBoard();
+            const modal = document.getElementById("rankingModal");
+            if (modal) modal.classList.remove("hidden");
+        }
+
+        function closeRankingModal() {
+            const modal = document.getElementById("rankingModal");
+            if (modal) modal.classList.add("hidden");
+        }
+
+        // -------------------- 2. 사운드 시스템 (Web Audio API 효과음 합성) --------------------
+        class SoundEffects {
+            constructor() {
+                this.enabled = true;
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                    }
+                }
+                if (this.ctx && this.ctx.state === "suspended") {
+                    this.ctx.resume();
+                }
+            }
+
+            toggle() {
+                this.enabled = !this.enabled;
+                return this.enabled;
+            }
+
+            playSlap(combo = 1) {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const intensity = Math.min(1.5, 1 + combo * 0.03);
+
+                const bufferSize = this.ctx.sampleRate * 0.18;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.038));
+                }
+
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = "bandpass";
+                filter.frequency.setValueAtTime(1350 + Math.min(combo * 25, 450), now);
+                filter.Q.setValueAtTime(1.1, now);
+
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(1.25 * intensity, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.ctx.destination);
+                noise.start(now);
+
+                const osc = this.ctx.createOscillator();
+                const oscGain = this.ctx.createGain();
+                osc.type = "triangle";
+                osc.frequency.setValueAtTime(240, now);
+                osc.frequency.exponentialRampToValueAtTime(42, now + 0.14);
+                oscGain.gain.setValueAtTime(0.9, now);
+                oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+                osc.connect(oscGain);
+                oscGain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            }
+
+            playPass(combo = 1) {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const pitchBoost = Math.min(combo * 14, 240);
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(523.25 + pitchBoost, now);
+                osc.frequency.setValueAtTime(659.25 + pitchBoost, now + 0.055);
+
+                gain.gain.setValueAtTime(0.32, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.17);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.18);
+            }
+
+            playFeverUp() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const freqs = [587.33, 783.99, 1046.5];
+                freqs.forEach((f, i) => {
+                    const now = this.ctx.currentTime + i * 0.05;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = "sawtooth";
+                    osc.frequency.setValueAtTime(f, now);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.23);
+                });
+            }
+
+            playWrong() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = "sawtooth";
+                osc.frequency.setValueAtTime(155, now);
+                osc.frequency.linearRampToValueAtTime(98, now + 0.28);
+
+                gain.gain.setValueAtTime(0.45, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.29);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+
+            playClear() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const now = this.ctx.currentTime + idx * 0.1;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = "triangle";
+                    osc.frequency.setValueAtTime(freq, now);
+                    gain.gain.setValueAtTime(0.35, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.36);
+                });
+            }
+        }
+
+        const sfx = new SoundEffects();
+
+        // -------------------- 3. 스테이지 및 게임 설정 --------------------
+        const STAGES = [
+            {
+                id: 1,
+                school: "남수원중",
+                badge: "STAGE 1: 남수원중",
+                quota: 14,
+                timeLimit: 30.0,
+                tightRange: [5.6, 7.4],
+                wideRange: [8.2, 10.2],
+                clearTitle: "남수원중 단속 완료!",
+                clearStory: "선도부 선생님이 도착하기 직전 남수원중을 평정했다!\n강력한 손맛을 각성한 킬러Z, 이제 옆 동네 <strong>매원중</strong>으로 침공한다!"
+            },
+            {
+                id: 2,
+                school: "매원중",
+                badge: "STAGE 2: 매원중",
+                quota: 18,
+                timeLimit: 30.0,
+                tightRange: [6.4, 7.6],
+                wideRange: [8.0, 9.4],
+                clearTitle: "매원중 정복 성공!",
+                clearStory: "매원중의 교묘한 세미 쫄바지까지 모두 꿰뚫어 본 킬러Z!\n이제 마지막 최후의 보루 <strong>호매실중</strong>으로 진격한다!"
+            },
+            {
+                id: 3,
+                school: "호매실중",
+                badge: "STAGE 3: 호매실중",
+                quota: 22,
+                timeLimit: 30.0,
+                tightRange: [6.8, 7.7],
+                wideRange: [7.9, 9.0],
+                clearTitle: "호매실중까지 완전 평정!",
+                clearStory: "전설이 된 킬러Z! 남수원중, 매원중, 호매실중 모든 학교의 교복 바지통이 7.8인치 이상으로 평화롭게 통일되었다!"
+            }
+        ];
+
+        const PANTS_COLORS = [
+            { name: "남색 교복", main: "#1E293B", dark: "#0F172A", light: "#334155", stripe: "#64748B" },
+            { name: "진회색 교복", main: "#374151", dark: "#1F2937", light: "#4B5563", stripe: "#9CA3AF" },
+            { name: "차콜 교복", main: "#27272A", dark: "#18181B", light: "#3F3F46", stripe: "#71717A" },
+            { name: "네이비 체크", main: "#172554", dark: "#0F172A", light: "#1E3A8A", stripe: "#60A5FA" }
+        ];
+
+        const SHOE_TYPES = ["sneakers", "loafers", "hightops", "slippers", "runners"];
+        const SLAP_CALLOUTS = ["짝!! 쫄바지 응징!", "풀스윙 작렬!!", "참교육 완료!!", "완벽한 손맛!!", "쫄바지 정화!"];
+        const PASS_CALLOUTS = ["패스! 정상 바지!", "나이스 통과!", "7.8 초과 합격!", "시원하게 패스!"];
+
+        // -------------------- 4. 게임 상태 관리 --------------------
+        const state = {
+            status: "TITLE",
+            stageIndex: 0,
+            timeLeft: 30.0,
+            score: 0,
+            combo: 0,
+            maxCombo: 0,
+            stageInspected: 0,
+            stageCorrect: 0,
+            totalCorrect: 0,
+            totalAttempts: 0,
+            totalSlaps: 0,
+            isAllCleared: false,
+            hasSubmittedRank: false,
+            currentStudent: null,
+            lastTime: 0,
+            animOffsetX: 0,
+            animOffsetY: 0,
+            animRotation: 0,
+            animAlpha: 1,
+            knockbackVx: 0,
+            knockbackVy: 0,
+            knockbackSpin: 0,
+            slapHandAnim: 0,
+            shockwaveRings: [],
+            windLines: [],
+            rulerReveal: null
+        };
+
+        // -------------------- 5. 캔버스 반응형 크기 조절 및 호환성 헬퍼 --------------------
+        function drawRoundRect(ctx, x, y, w, h, r) {
+            const radius = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+            ctx.beginPath();
+            if (typeof ctx.roundRect === "function") {
+                ctx.roundRect(x, y, w, h, radius);
+            } else {
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + w - radius, y);
+                ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+                ctx.lineTo(x + w, y + h - radius);
+                ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+                ctx.lineTo(x + radius, y + h);
+                ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.closePath();
+            }
+        }
+
+        function resizeCanvas() {
+            if (!canvasWrapper || !canvas || !ctx) return;
+            const rect = canvasWrapper.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            renderScene();
+        }
+
+        window.addEventListener("resize", resizeCanvas);
+
+        // -------------------- 6. 학생 다리 데이터 생성기 --------------------
+        function generateStudent(stage) {
+            const safeStage = stage || STAGES[Math.min(state.stageIndex, STAGES.length - 1)] || STAGES[0];
+            const isTight = Math.random() < 0.52;
+            let inches;
+
+            if (isTight) {
+                const [min, max] = safeStage.tightRange;
+                inches = +(min + Math.random() * (max - min)).toFixed(1);
+                if (inches >= 7.8) inches = 7.7;
+            } else {
+                const [min, max] = safeStage.wideRange;
+                inches = +(min + Math.random() * (max - min)).toFixed(1);
+                if (inches <= 7.8) inches = 7.9;
+            }
+
+            const legThicknessType = Math.floor(Math.random() * 3);
+            const legThicknessMultiplier = legThicknessType === 0 ? 0.84 : (legThicknessType === 1 ? 1.0 : 1.2);
+            const pantsColor = PANTS_COLORS[Math.floor(Math.random() * PANTS_COLORS.length)];
+            const shoeType = SHOE_TYPES[Math.floor(Math.random() * SHOE_TYPES.length)];
+            const sockColor = Math.random() < 0.65 ? "#FFFFFF" : (Math.random() < 0.5 ? "#111827" : "#CBD5E1");
+            const hasRolledUp = Math.random() < 0.35;
+            const poseTilt = (Math.random() - 0.5) * 0.08;
+
+            return {
+                inches,
+                isTight,
+                legThicknessType,
+                legThicknessMultiplier,
+                pantsColor,
+                shoeType,
+                sockColor,
+                hasRolledUp,
+                poseTilt
+            };
+        }
+
+        // -------------------- 7. 학생 다리 일러스트 및 타격 이펙트 렌더링 --------------------
+        function renderScene() {
+            if (!canvasWrapper || !ctx) return;
+            const width = canvasWrapper.clientWidth;
+            const height = canvasWrapper.clientHeight;
+            if (!width || !height) return;
+
+            ctx.clearRect(0, 0, width, height);
+            drawSchoolBackground(width, height);
+            drawWindEffects(ctx);
+
+            const student = state.currentStudent;
+            if (student) {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, Math.min(1, state.animAlpha));
+                ctx.translate(width / 2 + state.animOffsetX, height * 0.5 + state.animOffsetY);
+                ctx.rotate(student.poseTilt + state.animRotation);
+
+                const scale = Math.min(width / 380, height / 520);
+                ctx.scale(scale, scale);
+
+                drawStudentLegs(ctx, student);
+
+                if (state.rulerReveal) {
+                    drawInchRulerOverlay(ctx, student, state.rulerReveal);
+                }
+
+                ctx.restore();
+            }
+
+            drawShockwaveRings(ctx);
+
+            if (state.slapHandAnim > 0) {
+                drawSlapHandEffect(ctx, width, height);
+            }
+        }
+
+        function drawSchoolBackground(w, h) {
+            const floorY = h * 0.76;
+            ctx.fillStyle = state.combo >= 10 ? "#FED7AA" : "#D6D3D1";
+            ctx.fillRect(0, floorY, w, h - floorY);
+
+            ctx.strokeStyle = "#78716C";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, floorY);
+            ctx.lineTo(w, floorY);
+            ctx.stroke();
+
+            ctx.strokeStyle = "rgba(120, 113, 108, 0.25)";
+            ctx.lineWidth = 2;
+            for (let i = -3; i <= 3; i++) {
+                ctx.beginPath();
+                ctx.moveTo(w / 2 + i * 45, floorY);
+                ctx.lineTo(w / 2 + i * 110, h);
+                ctx.stroke();
+            }
+
+            const barY = h * 0.85;
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.18)";
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 6]);
+            ctx.beginPath();
+            ctx.moveTo(w * 0.15, barY);
+            ctx.lineTo(w * 0.85, barY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawStudentLegs(ctx, s) {
+            const cuffWidth = 46 + (s.inches - 7.8) * 7.2;
+            const thighBase = 56 * s.legThicknessMultiplier;
+            const thighWidth = Math.max(thighBase, cuffWidth * 1.05);
+            const kneeWidth = s.isTight
+                ? (38 * s.legThicknessMultiplier + cuffWidth) * 0.52
+                : Math.max(44 * s.legThicknessMultiplier, cuffWidth * 0.96);
+
+            const legSpacing = 54;
+            const waistY = -210;
+            const crotchY = -115;
+            const kneeY = -15;
+            const ankleY = 105;
+            const shoeBottomY = 148;
+
+            ctx.fillStyle = "rgba(0, 0, 0, 0.22)";
+            ctx.beginPath();
+            ctx.ellipse(0, shoeBottomY + 4, 115, 18, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            [-1, 1].forEach((dir) => {
+                const centerX = dir * legSpacing;
+                const ankleSkinW = 24 * s.legThicknessMultiplier;
+
+                ctx.fillStyle = "#FDBA74";
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.rect(centerX - ankleSkinW / 2, ankleY - 12, ankleSkinW, 32);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = s.sockColor;
+                ctx.beginPath();
+                ctx.rect(centerX - ankleSkinW / 2 - 1, ankleY + 4, ankleSkinW + 2, 24);
+                ctx.fill();
+                ctx.stroke();
+
+                if (s.sockColor === "#FFFFFF") {
+                    ctx.fillStyle = dir === -1 ? "#EF4444" : "#2563EB";
+                    ctx.fillRect(centerX - ankleSkinW / 2, ankleY + 8, ankleSkinW, 3);
+                }
+
+                drawShoe(ctx, centerX, ankleY + 24, dir, s.shoeType);
+
+                const topOuterX = centerX + dir * (thighWidth * 0.55);
+                const topInnerX = dir * 4;
+                const kneeOuterX = centerX + dir * (kneeWidth * 0.52);
+                const kneeInnerX = centerX - dir * (kneeWidth * 0.48);
+                const cuffOuterX = centerX + dir * (cuffWidth * 0.5);
+                const cuffInnerX = centerX - dir * (cuffWidth * 0.5);
+
+                ctx.fillStyle = s.pantsColor.main;
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 3.5;
+                ctx.lineJoin = "round";
+
+                ctx.beginPath();
+                ctx.moveTo(topInnerX, crotchY);
+                ctx.quadraticCurveTo(
+                    (topInnerX + kneeInnerX) * 0.5, (crotchY + kneeY) * 0.5,
+                    kneeInnerX, kneeY
+                );
+                ctx.lineTo(cuffInnerX, ankleY);
+                ctx.lineTo(cuffOuterX, ankleY);
+                ctx.lineTo(kneeOuterX, kneeY);
+                ctx.quadraticCurveTo(
+                    (kneeOuterX + topOuterX) * 0.5, (kneeY + waistY) * 0.5,
+                    topOuterX, waistY
+                );
+                ctx.lineTo(topInnerX, waistY);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.strokeStyle = s.pantsColor.stripe;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(centerX, crotchY + 15);
+                ctx.lineTo(centerX, ankleY - 6);
+                ctx.stroke();
+
+                ctx.strokeStyle = s.pantsColor.dark;
+                ctx.lineWidth = 2.2;
+                if (s.isTight) {
+                    for (let wy = kneeY - 12; wy <= kneeY + 25; wy += 14) {
+                        ctx.beginPath();
+                        ctx.moveTo(cuffInnerX + 4, wy);
+                        ctx.quadraticCurveTo(centerX, wy + 4, cuffOuterX - 4, wy - 2);
+                        ctx.stroke();
+                    }
+                } else {
+                    ctx.beginPath();
+                    ctx.moveTo(cuffInnerX + 5, ankleY - 14);
+                    ctx.quadraticCurveTo(centerX, ankleY - 6, cuffOuterX - 5, ankleY - 16);
+                    ctx.stroke();
+                }
+
+                if (s.hasRolledUp) {
+                    ctx.fillStyle = s.pantsColor.light;
+                    ctx.strokeStyle = "#000000";
+                    ctx.lineWidth = 2.5;
+                    ctx.fillRect(
+                        Math.min(cuffInnerX, cuffOuterX) - 1,
+                        ankleY - 11,
+                        cuffWidth + 2,
+                        11
+                    );
+                    ctx.strokeRect(
+                        Math.min(cuffInnerX, cuffOuterX) - 1,
+                        ankleY - 11,
+                        cuffWidth + 2,
+                        11
+                    );
+                }
+            });
+
+            const hipHalfW = Math.max(76 * s.legThicknessMultiplier, 68);
+            ctx.fillStyle = s.pantsColor.main;
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3.5;
+            drawRoundRect(ctx, -hipHalfW, waistY - 22, hipHalfW * 2, 112, 12);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, waistY + 12);
+            ctx.lineTo(0, crotchY);
+            ctx.stroke();
+
+            ctx.fillStyle = "#111827";
+            ctx.fillRect(-hipHalfW, waistY - 16, hipHalfW * 2, 16);
+            ctx.strokeRect(-hipHalfW, waistY - 16, hipHalfW * 2, 16);
+
+            ctx.fillStyle = "#FACC15";
+            ctx.fillRect(-13, waistY - 18, 26, 20);
+            ctx.strokeRect(-13, waistY - 18, 26, 20);
+
+            ctx.fillStyle = "#FFFFFF";
+            drawRoundRect(ctx, -hipHalfW - 4, waistY - 46, hipHalfW * 2 + 8, 30, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#1E293B";
+            ctx.beginPath();
+            ctx.moveTo(-hipHalfW - 8, waistY - 65);
+            ctx.lineTo(-hipHalfW - 4, waistY - 22);
+            ctx.lineTo(-22, waistY - 22);
+            ctx.lineTo(-10, waistY - 45);
+            ctx.lineTo(10, waistY - 45);
+            ctx.lineTo(22, waistY - 22);
+            ctx.lineTo(hipHalfW + 4, waistY - 22);
+            ctx.lineTo(hipHalfW + 8, waistY - 65);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        function drawShoe(ctx, x, y, dir, type) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(dir, 1);
+
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            ctx.lineJoin = "round";
+
+            if (type === "loafers") {
+                ctx.fillStyle = "#18181B";
+                ctx.beginPath();
+                ctx.moveTo(-18, 0);
+                ctx.lineTo(16, 0);
+                ctx.quadraticCurveTo(38, 4, 36, 22);
+                ctx.lineTo(-20, 22);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = "#09090B";
+                ctx.fillRect(-20, 18, 56, 6);
+                ctx.strokeRect(-20, 18, 56, 6);
+            } else if (type === "slippers") {
+                ctx.fillStyle = "#2563EB";
+                ctx.beginPath();
+                ctx.moveTo(-18, 4);
+                ctx.lineTo(18, 4);
+                ctx.quadraticCurveTo(36, 8, 35, 22);
+                ctx.lineTo(-19, 22);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillRect(0, 5, 4, 15);
+                ctx.fillRect(7, 5, 4, 15);
+                ctx.fillRect(14, 5, 4, 15);
+            } else if (type === "hightops") {
+                ctx.fillStyle = "#DC2626";
+                ctx.beginPath();
+                ctx.moveTo(-18, -8);
+                ctx.lineTo(14, -8);
+                ctx.lineTo(18, 4);
+                ctx.quadraticCurveTo(38, 6, 36, 20);
+                ctx.lineTo(-20, 20);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillRect(-20, 16, 56, 6);
+                ctx.strokeRect(-20, 16, 56, 6);
+                ctx.beginPath();
+                ctx.arc(27, 13, 8, -Math.PI * 0.5, Math.PI * 0.5);
+                ctx.fill();
+                ctx.stroke();
+            } else if (type === "runners") {
+                ctx.fillStyle = "#334155";
+                ctx.beginPath();
+                ctx.moveTo(-18, 0);
+                ctx.lineTo(14, 0);
+                ctx.quadraticCurveTo(38, 5, 37, 19);
+                ctx.lineTo(-20, 19);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = "#F8FAFC";
+                ctx.fillRect(-21, 15, 58, 8);
+                ctx.strokeRect(-21, 15, 58, 8);
+                ctx.fillStyle = "#84CC16";
+                ctx.fillRect(-14, 17, 14, 4);
+            } else {
+                ctx.fillStyle = "#F8FAFC";
+                ctx.beginPath();
+                ctx.moveTo(-18, 0);
+                ctx.lineTo(14, 0);
+                ctx.quadraticCurveTo(37, 5, 35, 21);
+                ctx.lineTo(-20, 21);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = "#0284C7";
+                ctx.beginPath();
+                ctx.moveTo(-8, 13);
+                ctx.lineTo(16, 7);
+                ctx.lineTo(14, 13);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = "#CBD5E1";
+                ctx.fillRect(-20, 17, 55, 5);
+                ctx.strokeRect(-20, 17, 55, 5);
+            }
+
+            ctx.restore();
+        }
+
+        function drawInchRulerOverlay(ctx, s, reveal) {
+            const cuffWidth = 46 + (s.inches - 7.8) * 7.2;
+            const centerX = 54;
+            const y = 95;
+
+            ctx.save();
+            ctx.strokeStyle = reveal.isCorrect ? "#16A34A" : "#DC2626";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(centerX - cuffWidth / 2 - 8, y);
+            ctx.lineTo(centerX + cuffWidth / 2 + 8, y);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(centerX - cuffWidth / 2, y - 10);
+            ctx.lineTo(centerX - cuffWidth / 2, y + 10);
+            ctx.moveTo(centerX + cuffWidth / 2, y - 10);
+            ctx.lineTo(centerX + cuffWidth / 2, y + 10);
+            ctx.stroke();
+
+            const label = `${s.inches.toFixed(1)}인치`;
+            ctx.font = "900 22px 'Black Han Sans', sans-serif";
+            const textW = ctx.measureText(label).width + 20;
+
+            ctx.fillStyle = s.isTight ? "#DC2626" : "#2563EB";
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            drawRoundRect(ctx, centerX - textW / 2, y - 46, textW, 32, 8);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#FFFFFF";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(label, centerX, y - 30);
+            ctx.restore();
+        }
+
+        function drawShockwaveRings(ctx) {
+            state.shockwaveRings.forEach((ring) => {
+                ctx.save();
+                ctx.strokeStyle = ring.color;
+                ctx.lineWidth = 6 * ring.alpha;
+                ctx.globalAlpha = ring.alpha;
+                ctx.beginPath();
+                ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            });
+        }
+
+        function drawWindEffects(ctx) {
+            state.windLines.forEach((line) => {
+                ctx.save();
+                ctx.strokeStyle = "#38BDF8";
+                ctx.lineWidth = line.thickness;
+                ctx.lineCap = "round";
+                ctx.globalAlpha = line.alpha;
+                ctx.beginPath();
+                ctx.moveTo(line.x, line.y);
+                ctx.lineTo(line.x + line.length, line.y);
+                ctx.stroke();
+                ctx.restore();
+            });
+        }
+
+        function drawSlapHandEffect(ctx, w, h) {
+            const progress = 1 - state.slapHandAnim;
+            const cx = w * 0.55;
+            const cy = h * 0.45;
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            const scale = 0.65 + Math.sin(progress * Math.PI) * 0.85;
+            ctx.scale(scale, scale);
+            ctx.rotate(-0.25 + progress * 0.35);
+            ctx.globalAlpha = state.slapHandAnim;
+
+            ctx.fillStyle = "#FACC15";
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            const spikes = 12;
+            for (let i = 0; i < spikes * 2; i++) {
+                const r = i % 2 === 0 ? 92 : 44;
+                const angle = (i * Math.PI) / spikes;
+                const px = Math.cos(angle) * r;
+                const py = Math.sin(angle) * r;
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#EF4444";
+            ctx.beginPath();
+            ctx.ellipse(0, 10, 26, 30, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            const fingerAngles = [-0.55, -0.25, 0.05, 0.35];
+            fingerAngles.forEach((ang, idx) => {
+                ctx.save();
+                ctx.rotate(ang);
+                ctx.fillStyle = "#EF4444";
+                drawRoundRect(ctx, -6, -52 - (idx === 1 || idx === 2 ? 6 : 0), 12, 36, 6);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            });
+
+            ctx.restore();
+        }
+
+        // -------------------- 8. 판정 로직 및 콤보 손맛 연출 --------------------
+        let isProcessingAction = false;
+
+        function spawnShockwave() {
+            const w = canvasWrapper.clientWidth;
+            const h = canvasWrapper.clientHeight;
+            state.shockwaveRings.push({
+                x: w * 0.52,
+                y: h * 0.46,
+                radius: 25,
+                alpha: 1.0,
+                color: state.combo >= 10 ? "#FACC15" : "#EF4444"
+            });
+            state.shockwaveRings.push({
+                x: w * 0.52,
+                y: h * 0.46,
+                radius: 10,
+                alpha: 0.9,
+                color: "#FFFFFF"
+            });
+        }
+
+        function spawnWindLines() {
+            const w = canvasWrapper.clientWidth;
+            const h = canvasWrapper.clientHeight;
+            for (let i = 0; i < 6; i++) {
+                state.windLines.push({
+                    x: w * (0.25 + Math.random() * 0.5),
+                    y: h * (0.2 + Math.random() * 0.55),
+                    length: 60 + Math.random() * 80,
+                    thickness: 3 + Math.random() * 3,
+                    alpha: 0.9
+                });
+            }
+        }
+
+        function triggerMilestoneCutin(combo) {
+            const milestones = {
+                5: { text: "🔥 5 COMBO! 손이 풀리기 시작했다!", bg: "bg-orange-500 text-white" },
+                10: { text: "⚡ 10 COMBO! 킬러Z 폭주 모드 발동 (점수 2배!) ⚡", bg: "bg-red-600 text-yellow-300" },
+                15: { text: "💥 15 COMBO! 전설의 매의 눈 각성!!", bg: "bg-purple-700 text-yellow-300" },
+                20: { text: "👑 20 COMBO! 인간 자로봇 경지 도달!!", bg: "bg-black text-yellow-400" }
+            };
+
+            const info = milestones[combo];
+            if (!info || !cutinOverlay) return;
+
+            sfx.playFeverUp();
+            const banner = document.createElement("div");
+            banner.className = `cutin-banner px-4 py-1.5 rounded-xl comic-border-sm font-title text-base sm:text-lg ${info.bg} shadow-xl whitespace-nowrap`;
+            banner.textContent = info.text;
+            cutinOverlay.innerHTML = "";
+            cutinOverlay.appendChild(banner);
+        }
+
+        function handlePlayerAction(action) {
+            if (state.status !== "PLAYING" || !state.currentStudent || isProcessingAction) return;
+            isProcessingAction = true;
+
+            const student = state.currentStudent;
+            const isCorrect = (action === "SLAP" && student.isTight) || (action === "PASS" && !student.isTight);
+
+            state.totalAttempts++;
+            state.rulerReveal = { isCorrect };
+
+            if (isCorrect) {
+                sfx.init();
+                state.combo++;
+                if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+
+                const isFever = state.combo >= 10;
+                const multiplier = isFever ? 2 : 1;
+                const comboBonus = Math.min(state.combo * 25, 250);
+                state.score += (100 + comboBonus) * multiplier;
+
+                state.stageInspected++;
+                state.stageCorrect++;
+                state.totalCorrect++;
+
+                if (action === "SLAP") {
+                    sfx.playSlap(state.combo);
+                    state.totalSlaps++;
+                    state.slapHandAnim = 1.0;
+                    spawnShockwave();
+                    triggerScreenShake();
+                    state.knockbackVx = 1650;
+                    state.knockbackVy = -480;
+                    state.knockbackSpin = 7.5;
+
+                    const callout = SLAP_CALLOUTS[Math.floor(Math.random() * SLAP_CALLOUTS.length)];
+                    showFloatingFeedback(
+                        callout,
+                        `${student.inches.toFixed(1)}인치 (7.8 미만)${isFever ? " · 2X FEVER!" : ""}`,
+                        "bg-red-600 text-yellow-300"
+                    );
+                } else {
+                    sfx.playPass(state.combo);
+                    spawnWindLines();
+                    state.knockbackVx = -1850;
+                    state.knockbackVy = 0;
+                    state.knockbackSpin = -0.35;
+
+                    const callout = PASS_CALLOUTS[Math.floor(Math.random() * PASS_CALLOUTS.length)];
+                    showFloatingFeedback(
+                        callout,
+                        `${student.inches.toFixed(1)}인치 (7.8 초과)${isFever ? " · 2X FEVER!" : ""}`,
+                        "bg-blue-600 text-white"
+                    );
+                }
+
+                if ([5, 10, 15, 20].includes(state.combo)) {
+                    triggerMilestoneCutin(state.combo);
+                }
+            } else {
+                sfx.playWrong();
+                triggerScreenShake();
+                triggerPenaltyFlash();
+                state.combo = 0;
+                state.timeLeft = Math.max(0, state.timeLeft - 2.0);
+
+                const reason = student.isTight
+                    ? `놓쳤다! ${student.inches.toFixed(1)}인치 쫄바지였음! (-2초)`
+                    : `억울함! ${student.inches.toFixed(1)}인치 정상 바지였음! (-2초)`;
+
+                showFloatingFeedback(
+                    "❌ 단속 실수!",
+                    reason,
+                    "bg-gray-900 text-red-400"
+                );
+            }
+
+            updateHud();
+            renderScene();
+
+            const currentStage = STAGES[state.stageIndex] || STAGES[STAGES.length - 1];
+            if (state.stageInspected >= currentStage.quota) {
+                setTimeout(() => {
+                    isProcessingAction = false;
+                    completeStage();
+                }, 360);
+                return;
+            }
+
+            setTimeout(() => {
+                if (state.status !== "PLAYING") {
+                    isProcessingAction = false;
+                    return;
+                }
+                state.rulerReveal = null;
+                state.knockbackVx = 0;
+                state.knockbackVy = 0;
+                state.knockbackSpin = 0;
+                state.animOffsetY = 0;
+                state.animRotation = 0;
+                state.currentStudent = generateStudent(currentStage);
+                state.animOffsetX = action === "PASS" ? 110 : -110;
+                state.animAlpha = 0.25;
+                isProcessingAction = false;
+            }, 230);
+        }
+
+        function triggerScreenShake() {
+            if (!gameContainer) return;
+            gameContainer.classList.remove("shake-anim");
+            void gameContainer.offsetWidth;
+            gameContainer.classList.add("shake-anim");
+        }
+
+        function triggerPenaltyFlash() {
+            if (!penaltyOverlay) return;
+            penaltyOverlay.classList.remove("hidden", "penalty-flash");
+            void penaltyOverlay.offsetWidth;
+            penaltyOverlay.classList.add("penalty-flash");
+            setTimeout(() => {
+                penaltyOverlay.classList.add("hidden");
+            }, 460);
+        }
+
+        function showFloatingFeedback(mainText, subText, badgeClass) {
+            if (!feedbackOverlay) return;
+            const el = document.createElement("div");
+            el.className = `slap-effect flex flex-col items-center justify-center px-5 py-2.5 rounded-2xl comic-border ${badgeClass} shadow-2xl`;
+            el.innerHTML = `
+                <span class="font-title text-2xl sm:text-3xl text-stroke-sm">${mainText}</span>
+                <span class="font-comic text-xs sm:text-sm mt-0.5 bg-black/45 px-2.5 py-0.5 rounded-full text-white">${subText}</span>
+            `;
+            feedbackOverlay.innerHTML = "";
+            feedbackOverlay.appendChild(el);
+        }
+
+        // -------------------- 9. 게임 루프 및 타이머 --------------------
+        function gameLoop(timestamp) {
+            if (!state.lastTime) state.lastTime = timestamp;
+            const dt = Math.min(0.1, (timestamp - state.lastTime) / 1000);
+            state.lastTime = timestamp;
+
+            if (state.status === "PLAYING") {
+                state.timeLeft -= dt;
+                if (state.timeLeft <= 0) {
+                    state.timeLeft = 0;
+                    updateHud();
+                    endGame(false);
+                    requestAnimationFrame(gameLoop);
+                    return;
+                }
+
+                if (state.knockbackVx !== 0 || state.knockbackVy !== 0) {
+                    state.animOffsetX += state.knockbackVx * dt;
+                    state.animOffsetY += state.knockbackVy * dt;
+                    state.animRotation += state.knockbackSpin * dt;
+                    state.animAlpha = Math.max(0, state.animAlpha - dt * 3.2);
+                } else {
+                    state.animOffsetX *= Math.pow(0.0005, dt);
+                    if (Math.abs(state.animOffsetX) < 0.5) state.animOffsetX = 0;
+                    state.animAlpha = Math.min(1, state.animAlpha + dt * 8);
+                }
+
+                if (state.slapHandAnim > 0) {
+                    state.slapHandAnim = Math.max(0, state.slapHandAnim - dt * 4.0);
+                }
+
+                for (let i = state.shockwaveRings.length - 1; i >= 0; i--) {
+                    const ring = state.shockwaveRings[i];
+                    ring.radius += 520 * dt;
+                    ring.alpha -= 2.8 * dt;
+                    if (ring.alpha <= 0) state.shockwaveRings.splice(i, 1);
+                }
+
+                for (let i = state.windLines.length - 1; i >= 0; i--) {
+                    const line = state.windLines[i];
+                    line.x -= 950 * dt;
+                    line.alpha -= 3.2 * dt;
+                    if (line.alpha <= 0) state.windLines.splice(i, 1);
+                }
+
+                updateHud();
+                renderScene();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        let lastRenderedCombo = 0;
+
+        function updateHud() {
+            const stage = STAGES[state.stageIndex] || STAGES[STAGES.length - 1];
+            document.getElementById("stageBadge").textContent = stage.badge;
+            document.getElementById("quotaDisplay").textContent = `목표: ${state.stageInspected} / ${stage.quota}명`;
+            document.getElementById("scoreDisplay").textContent = state.score.toLocaleString();
+
+            const comboBadge = document.getElementById("comboBadge");
+            if (state.combo >= 2) {
+                comboBadge.classList.remove("hidden");
+                comboBadge.textContent = `${state.combo} COMBO!`;
+
+                centerComboHud.classList.remove("hidden");
+                centerComboText.textContent = `${state.combo} COMBO!`;
+                if (lastRenderedCombo !== state.combo) {
+                    centerComboHud.classList.remove("combo-pop");
+                    void centerComboHud.offsetWidth;
+                    centerComboHud.classList.add("combo-pop");
+                    lastRenderedCombo = state.combo;
+                }
+            } else {
+                comboBadge.classList.add("hidden");
+                centerComboHud.classList.add("hidden");
+                lastRenderedCombo = 0;
+            }
+
+            if (state.combo >= 10) {
+                gameContainer.classList.add("fever-mode");
+                feverBadge.classList.remove("hidden");
+            } else {
+                gameContainer.classList.remove("fever-mode");
+                feverBadge.classList.add("hidden");
+            }
+
+            const timeText = document.getElementById("timeText");
+            const timerBar = document.getElementById("timerBar");
+            const teacherIcon = document.getElementById("teacherIcon");
+            const teacherStatus = document.getElementById("teacherStatus");
+
+            timeText.textContent = `${state.timeLeft.toFixed(1)}초`;
+            const pct = Math.max(0, Math.min(100, (state.timeLeft / stage.timeLimit) * 100));
+            timerBar.style.width = `${pct}%`;
+            teacherIcon.style.left = `${Math.max(2, Math.min(90, pct - 4))}%`;
+
+            if (state.timeLeft <= 8.0) {
+                gameHud.classList.add("urgent-timer");
+                teacherStatus.textContent = "😱 선도부 선생님 코앞 도착!! 서둘러!";
+            } else {
+                gameHud.classList.remove("urgent-timer");
+                teacherStatus.textContent = "🚨 선도부 선생님 접근 중!";
+            }
+        }
+
+        // -------------------- 10. 스테이지 흐름 제어 --------------------
+        function startGame() {
+            sfx.init();
+            state.stageIndex = 0;
+            state.score = 0;
+            state.combo = 0;
+            state.maxCombo = 0;
+            state.totalCorrect = 0;
+            state.totalAttempts = 0;
+            state.totalSlaps = 0;
+            state.isAllCleared = false;
+            state.hasSubmittedRank = false;
+            latestInsertedDocId = null;
+
+            titleScreen.classList.add("hidden");
+            endModal.classList.add("hidden");
+            stageModal.classList.add("hidden");
+
+            gameHud.classList.remove("hidden");
+            touchZones.classList.remove("hidden");
+            ruleBanner.classList.remove("hidden");
+            gameControls.classList.remove("hidden");
+
+            resizeCanvas();
+            startStage(0);
+        }
+
+        function startStage(index) {
+            const safeIndex = Math.max(0, Math.min(index, STAGES.length - 1));
+            const stage = STAGES[safeIndex];
+
+            state.stageIndex = safeIndex;
+            state.timeLeft = stage.timeLimit;
+            state.stageInspected = 0;
+            state.stageCorrect = 0;
+            state.rulerReveal = null;
+            state.slapHandAnim = 0;
+            state.knockbackVx = 0;
+            state.knockbackVy = 0;
+            state.knockbackSpin = 0;
+            state.animOffsetX = 0;
+            state.animOffsetY = 0;
+            state.animRotation = 0;
+            state.animAlpha = 1;
+            state.shockwaveRings = [];
+            state.windLines = [];
+            state.currentStudent = generateStudent(stage);
+            state.status = "PLAYING";
+            state.lastTime = performance.now();
+            isProcessingAction = false;
+
+            feedbackOverlay.innerHTML = "";
+            cutinOverlay.innerHTML = "";
+            updateHud();
+            renderScene();
+        }
+
+        function completeStage() {
+            if (state.status !== "PLAYING") return;
+            state.status = "STAGE_CLEAR";
+            sfx.playClear();
+
+            const stage = STAGES[state.stageIndex] || STAGES[STAGES.length - 1];
+            const timeBonus = Math.round(state.timeLeft * 30);
+            state.score += timeBonus;
+
+            if (state.stageIndex >= STAGES.length - 1) {
+                state.isAllCleared = true;
+                endGame(true);
+                return;
+            }
+
+            const nextStage = STAGES[state.stageIndex + 1];
+            document.getElementById("modalBadge").textContent = `${stage.school} 제압 완료! (+시간보너스 ${timeBonus}점)`;
+            document.getElementById("modalTitle").textContent = stage.clearTitle;
+            document.getElementById("modalStory").innerHTML = stage.clearStory.replace(/\n/g, "<br>");
+
+            const acc = state.totalAttempts > 0 ? Math.round((state.totalCorrect / state.totalAttempts) * 100) : 100;
+            document.getElementById("statCaught").textContent = `${state.stageInspected}명`;
+            document.getElementById("statAccuracy").textContent = `${acc}%`;
+            document.getElementById("statScore").textContent = `${state.score.toLocaleString()}점`;
+
+            document.getElementById("btnNextStage").textContent = `🔥 ${nextStage.school} 침공하기 ▶`;
+            stageModal.classList.remove("hidden");
+        }
+
+        function endGame(isVictory) {
+            state.status = "GAME_OVER";
+            state.isAllCleared = Boolean(isVictory);
+            gameHud.classList.remove("urgent-timer");
+            gameContainer.classList.remove("fever-mode");
+            centerComboHud.classList.add("hidden");
+
+            const endCard = document.getElementById("endCard");
+            const endEmoji = document.getElementById("endEmoji");
+            const endBadge = document.getElementById("endBadge");
+            const endTitle = document.getElementById("endTitle");
+            const endDesc = document.getElementById("endDesc");
+
+            const btnSubmit = document.getElementById("btnSubmitRank");
+            const statusTag = document.getElementById("registerStatusTag");
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "기록 등록";
+            btnSubmit.className = "btn-arcade bg-red-600 hover:bg-red-500 text-white font-comic text-sm sm:text-base px-4 py-2 rounded-xl comic-border-sm whitespace-nowrap";
+            statusTag.textContent = "닉네임 입력 후 등록";
+            statusTag.className = "text-xs text-red-600 font-bold";
+
+            const currentSchool = STAGES[Math.min(state.stageIndex, STAGES.length - 1)].school;
+
+            if (isVictory) {
+                endCard.className = "w-full bg-amber-300 rounded-3xl p-4 sm:p-5 comic-border flex flex-col items-center my-auto";
+                endEmoji.textContent = "👑";
+                endBadge.className = "bg-red-600 text-white font-comic text-xs sm:text-sm px-3 py-1 rounded-full comic-border-sm mb-1.5";
+                endBadge.textContent = "3개 학교 완전 제패!";
+                endTitle.textContent = "수원 교복 단속 평정!";
+                endDesc.textContent = "남수원중, 매원중, 호매실중의 모든 쫄바지가 킬러Z의 불꽃 싸대기 아래 정화되었습니다!";
+            } else {
+                sfx.playWrong();
+                endCard.className = "w-full bg-slate-200 rounded-3xl p-4 sm:p-5 comic-border flex flex-col items-center my-auto";
+                endEmoji.textContent = "🚨";
+                endBadge.className = "bg-black text-yellow-300 font-comic text-xs sm:text-sm px-3 py-1 rounded-full mb-1.5";
+                endBadge.textContent = "선도부 선생님 등장!";
+                endTitle.textContent = "단속 시간 초과!";
+                endDesc.textContent = `${currentSchool} 단속 도중 선도부 선생님이 들이닥쳤습니다! 현재 기록을 명예의 전당에 남겨보세요!`;
+            }
+
+            const accuracy = state.totalAttempts > 0 ? Math.round((state.totalCorrect / state.totalAttempts) * 100) : 0;
+            const stageLabel = isVictory ? "호매실중(완전정복)" : currentSchool;
+
+            document.getElementById("finalScore").textContent = `${state.score.toLocaleString()}점`;
+            document.getElementById("finalStageAndSlaps").textContent = `${stageLabel} / ${state.totalSlaps}명`;
+            document.getElementById("finalCombo").textContent = `${state.maxCombo} COMBO`;
+            document.getElementById("finalAccuracy").textContent = `${accuracy}%`;
+
+            endModal.classList.remove("hidden");
+        }
+
+        // -------------------- 11. 이벤트 바인딩 (터치, 클릭, 키보드, 랭킹) --------------------
+        function bindEvent(id, event, handler) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener(event, handler);
+            }
+        }
+
+        function initEventListeners() {
+            bindEvent("btnStartGame", "click", startGame);
+
+            bindEvent("btnNextStage", "click", () => {
+                stageModal.classList.add("hidden");
+                const nextIdx = state.stageIndex + 1;
+                if (nextIdx >= STAGES.length) {
+                    endGame(true);
+                } else {
+                    startStage(nextIdx);
+                }
+            });
+
+            bindEvent("btnRestart", "click", startGame);
+
+            bindEvent("btnToggleSound", "click", (e) => {
+                const on = sfx.toggle();
+                e.target.textContent = on ? "🔊 효과음 ON" : "🔇 효과음 OFF";
+            });
+
+            // 랭킹 모달 및 등록 버튼 이벤트
+            bindEvent("btnOpenRankingFromTitle", "click", openRankingModal);
+            bindEvent("btnViewRankingEnd", "click", openRankingModal);
+            bindEvent("btnCloseRanking", "click", closeRankingModal);
+            bindEvent("btnRefreshRanking", "click", () => {
+                subscribeToRankings();
+                renderRankingBoard();
+            });
+            bindEvent("btnSubmitRank", "click", submitRankingScore);
+            bindEvent("nicknameInput", "keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    submitRankingScore();
+                }
+            });
+
+            // 하단 큰 버튼 조작
+            bindEvent("btnPass", "click", () => handlePlayerAction("PASS"));
+            bindEvent("btnSlap", "click", () => handlePlayerAction("SLAP"));
+
+            // 화면 좌/우 영역 직접 터치 및 클릭 조작
+            bindEvent("leftTouchZone", "click", () => handlePlayerAction("PASS"));
+            bindEvent("rightTouchZone", "click", () => handlePlayerAction("SLAP"));
+        }
+
+        // 데스크탑 키보드 방향키 / A, D 키 지원
+        window.addEventListener("keydown", (e) => {
+            if (state.status !== "PLAYING") return;
+            if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+                e.preventDefault();
+                handlePlayerAction("PASS");
+            } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+                e.preventDefault();
+                handlePlayerAction("SLAP");
+            }
+        });
+
+        // 초기화 및 애니메이션 루프 시작
+        function bootstrapGame() {
+            initEventListeners();
+            resizeCanvas();
+            initFirebaseRanking();
+            requestAnimationFrame(gameLoop);
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", bootstrapGame);
+        } else {
+            bootstrapGame();
+        }
+    </script>
+</body>
+</html>
