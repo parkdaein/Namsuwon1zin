@@ -65,10 +65,10 @@
 
         @keyframes screenShake {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            20% { transform: translate(-8px, 4px) rotate(-1deg); }
-            40% { transform: translate(8px, -4px) rotate(1deg); }
-            60% { transform: translate(-6px, -3px) rotate(-0.5deg); }
-            80% { transform: translate(6px, 3px) rotate(0.5deg); }
+            20% { transform: translate(-9px, 5px) rotate(-1.2deg); }
+            40% { transform: translate(9px, -5px) rotate(1.2deg); }
+            60% { transform: translate(-7px, -3px) rotate(-0.6deg); }
+            80% { transform: translate(7px, 3px) rotate(0.6deg); }
         }
 
         .shake-anim {
@@ -77,7 +77,7 @@
 
         @keyframes popFeedback {
             0% { transform: scale(0.4) translateY(15px); opacity: 0; }
-            35% { transform: scale(1.12) translateY(-4px); opacity: 1; }
+            35% { transform: scale(1.14) translateY(-4px); opacity: 1; }
             80% { transform: scale(1) translateY(0); opacity: 1; }
             100% { transform: scale(0.95) translateY(-10px); opacity: 0; }
         }
@@ -149,11 +149,33 @@
             background-image: radial-gradient(#00000022 2px, transparent 2px);
             background-size: 16px 16px;
         }
+
+        /* 말풍선 꼬리 */
+        .speech-bubble::before {
+            content: "";
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-width: 6px 8px 6px 0;
+            border-style: solid;
+            border-color: transparent #000000 transparent transparent;
+        }
+        .speech-bubble::after {
+            content: "";
+            position: absolute;
+            left: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-width: 5px 7px 5px 0;
+            border-style: solid;
+            border-color: transparent #FFFFFF transparent transparent;
+        }
     </style>
 </head>
 <body class="w-screen h-screen flex items-center justify-center bg-slate-900">
 
-    <!-- 메인 게임 컨테이너 (모바일/데스크탑 최적화 비율) -->
+    <!-- 메인 게임 컨테이너 -->
     <div id="gameContainer" class="relative w-full max-w-md h-full sm:h-[92vh] sm:max-h-[820px] bg-amber-100 sm:rounded-3xl comic-border overflow-hidden flex flex-col justify-between shadow-2xl">
 
         <!-- ==================== 1. 상단 HUD (게임 진행 중 표시) ==================== -->
@@ -192,8 +214,25 @@
         </header>
 
         <!-- ==================== 2. 중앙 캔버스 영역 ==================== -->
-        <main id="canvasWrapper" class="relative flex-1 w-full bg-gradient-to-b from-sky-200 via-amber-50 to-stone-200 overflow-hidden">
+        <main id="canvasWrapper" class="relative flex-1 w-full bg-sky-200 overflow-hidden">
             <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+            <!-- 좌측 상단: 킬러Z 라이브 표정 & 코믹 말풍선 -->
+            <div id="killerZLiveBox" class="hidden pointer-events-none absolute top-2.5 left-2.5 z-20 flex items-center gap-2">
+                <div id="killerZAvatar" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-yellow-300 border-3 border-black shadow-md flex items-center justify-center overflow-hidden shrink-0" style="border-width: 3px;">
+                    <!-- SVG 동적 삽입 -->
+                </div>
+                <div id="killerZSpeech" class="speech-bubble relative bg-white border-2 border-black rounded-xl px-2.5 py-1 shadow-md max-w-[175px] sm:max-w-[200px]">
+                    <span id="killerZQuote" class="font-comic text-xs sm:text-sm text-gray-900 leading-tight block">
+                        어디 쫄바지 놈들 나와봐라!
+                    </span>
+                </div>
+            </div>
+
+            <!-- 우측 상단: 현재 학교 테마 뱃지 -->
+            <div id="themeTag" class="hidden pointer-events-none absolute top-2.5 right-2.5 z-10 bg-black/75 text-yellow-300 font-comic text-[11px] sm:text-xs px-2.5 py-1 rounded-full">
+                ☀️ 아침 등굣길 정문
+            </div>
 
             <!-- 기준선 안내 배너 -->
             <div id="ruleBanner" class="hidden pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 z-10 bg-black/80 text-white font-comic text-xs px-3 py-1 rounded-full whitespace-nowrap">
@@ -201,7 +240,7 @@
             </div>
 
             <!-- 중앙 상단 역동적 콤보 카운터 & 피버 배지 -->
-            <div id="centerComboHud" class="hidden pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
+            <div id="centerComboHud" class="hidden pointer-events-none absolute top-16 sm:top-20 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
                 <div id="feverBadge" class="hidden bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400 text-white font-title text-xs sm:text-sm px-3 py-0.5 rounded-full border-2 border-black shadow-md mb-1 tracking-wider whitespace-nowrap">
                     🔥 킬러Z 폭주 모드 (점수 2배!) 🔥
                 </div>
@@ -211,7 +250,7 @@
             </div>
 
             <!-- 콤보 마일스톤 각성 컷인 배너 (5, 10, 15, 20콤보) -->
-            <div id="cutinOverlay" class="pointer-events-none absolute top-20 inset-x-0 z-20 flex justify-center overflow-hidden"></div>
+            <div id="cutinOverlay" class="pointer-events-none absolute top-28 inset-x-0 z-20 flex justify-center overflow-hidden"></div>
 
             <!-- 판정 피드백 플로팅 오버레이 -->
             <div id="feedbackOverlay" class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"></div>
@@ -226,10 +265,10 @@
             <!-- 터치 영역 가이드 (게임 중 직접 터치 존) -->
             <div id="touchZones" class="hidden absolute inset-0 z-10 flex">
                 <div id="leftTouchZone" class="w-1/2 h-full cursor-pointer active:bg-blue-500/10 flex items-center justify-start pl-3">
-                    <span class="pointer-events-none opacity-25 font-title text-blue-800 text-xl">◀ PASS</span>
+                    <span class="pointer-events-none opacity-25 font-title text-blue-900 text-xl">◀ PASS</span>
                 </div>
                 <div id="rightTouchZone" class="w-1/2 h-full cursor-pointer active:bg-red-500/10 flex items-center justify-end pr-3">
-                    <span class="pointer-events-none opacity-25 font-title text-red-800 text-xl">SLAP ▶</span>
+                    <span class="pointer-events-none opacity-25 font-title text-red-900 text-xl">SLAP ▶</span>
                 </div>
             </div>
         </main>
@@ -273,22 +312,16 @@
                 <div class="w-32 h-32 sm:w-36 sm:h-36 bg-white rounded-full comic-border flex items-center justify-center mb-3 relative overflow-hidden shadow-xl">
                     <svg viewBox="0 0 120 120" class="w-full h-full">
                         <circle cx="60" cy="60" r="58" fill="#FEF08A"/>
-                        <!-- 얼굴 -->
                         <circle cx="60" cy="64" r="34" fill="#FDBA74" stroke="#000" stroke-width="4"/>
-                        <!-- 머리띠 -->
                         <rect x="26" y="42" width="68" height="11" rx="4" fill="#DC2626" stroke="#000" stroke-width="3"/>
                         <text x="60" y="50" text-anchor="middle" fill="#FFF" font-size="8" font-weight="900">KILLER Z</text>
-                        <!-- 머리카락 -->
                         <path d="M26 44 C26 20, 94 20, 94 44 Z" fill="#1E293B" stroke="#000" stroke-width="4"/>
-                        <!-- 선글라스 -->
                         <polygon points="32,56 57,56 53,70 35,70" fill="#000"/>
                         <polygon points="63,56 88,56 85,70 67,70" fill="#000"/>
                         <line x1="57" y1="60" x2="63" y2="60" stroke="#000" stroke-width="4"/>
                         <line x1="38" y1="59" x2="45" y2="67" stroke="#FFF" stroke-width="2"/>
                         <line x1="69" y1="59" x2="76" y2="67" stroke="#FFF" stroke-width="2"/>
-                        <!-- 불타는 입 -->
                         <path d="M46 80 Q60 92 74 80" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
-                        <!-- 거대한 손바닥 -->
                         <circle cx="96" cy="88" r="16" fill="#EF4444" stroke="#000" stroke-width="3.5"/>
                         <text x="96" y="92" text-anchor="middle" fill="#FEF08A" font-size="11" font-weight="900">짝!</text>
                     </svg>
@@ -297,7 +330,7 @@
                 <!-- 게임 규칙 요약 카드 -->
                 <div class="w-full bg-white rounded-2xl p-3 comic-border text-left space-y-1.5 mb-3">
                     <p class="font-comic text-sm sm:text-base text-center text-red-600 border-b-2 border-dashed border-gray-300 pb-1">
-                        🔥 제한시간 30초! 10콤보 달성 시 '폭주 모드(점수 2배)' 발동!
+                        🔥 5콤보마다 +1.5초 보너스! 10콤보 시 폭주 모드(점수 2배)!
                     </p>
                     <div class="grid grid-cols-2 gap-2 text-xs sm:text-sm font-bold">
                         <div class="bg-blue-50 border-2 border-blue-500 rounded-xl p-2">
@@ -310,7 +343,7 @@
                         </div>
                     </div>
                     <p class="text-[11px] sm:text-xs text-gray-600 text-center">
-                        ※ 팁: 신발 크기와 발목 여유 공간을 눈썰미로 파악하세요! (키보드 ← / → 지원)
+                        ※ 남수원중(아침) → 매원중(점심) → 호매실중(석양) 3개 학교 제패에 도전하세요!
                     </p>
                 </div>
             </div>
@@ -358,13 +391,19 @@
         <section id="endModal" class="hidden absolute inset-0 z-50 bg-slate-900/95 flex flex-col items-center justify-center p-4 sm:p-5 text-center overflow-y-auto">
             <div id="endCard" class="w-full bg-amber-300 rounded-3xl p-4 sm:p-5 comic-border flex flex-col items-center my-auto">
                 <div id="endEmoji" class="text-4xl sm:text-5xl mb-1">👑</div>
-                <span id="endBadge" class="bg-red-600 text-white font-comic text-xs sm:text-sm px-3 py-1 rounded-full comic-border-sm mb-1.5">
+                <span id="endBadge" class="bg-red-600 text-white font-comic text-xs sm:text-sm px-3 py-1 rounded-full comic-border-sm mb-1">
                     전 학교 제패 성공!
                 </span>
-                <h2 id="endTitle" class="font-title text-3xl sm:text-4xl text-white text-stroke mb-1.5">
+                <h2 id="endTitle" class="font-title text-3xl sm:text-4xl text-white text-stroke mb-1">
                     수원 일대 교복 평정!
                 </h2>
-                <p id="endDesc" class="font-comic text-sm sm:text-base text-gray-900 bg-white rounded-2xl p-2.5 comic-border-sm mb-3 w-full">
+
+                <!-- 획득 칭호 배지 -->
+                <div id="rankTitleBadge" class="bg-black text-yellow-300 font-comic text-xs sm:text-sm px-3.5 py-1 rounded-full border-2 border-yellow-400 mb-2">
+                    🏅 획득 칭호: 수원 일대 전설
+                </div>
+
+                <p id="endDesc" class="font-comic text-xs sm:text-sm text-gray-900 bg-white rounded-2xl p-2.5 comic-border-sm mb-3 w-full">
                     남수원중, 매원중, 호매실중의 모든 쫄바지가 킬러Z의 손바닥 아래 정화되었습니다!
                 </p>
 
@@ -455,10 +494,10 @@
     <script type="module">
         /**
          * ============================================================================
-         * 남수원의 바지단속 (Namsuwon's Pants Inspection) - Complete Edition
-         * 1. 중복 코드 및 DOM 참조 오류 완전 수정
-         * 2. Firebase Firestore 100개 이상 무제한 저장 + 실시간 TOP 10 노출
-         * 3. 유저 입력 닉네임 검증 및 저장
+         * 남수원의 바지단속 (Namsuwon's Pants Inspection) - Upgraded Comics Edition
+         * 1. 타격감 강화: 히트스톱(Hit-stop), 충격파, 역동적 넉백, 5콤보 타임 보너스
+         * 2. 코믹 연출: 킬러Z 실시간 표정/말풍선 & 5단계 단속반 칭호 시스템
+         * 3. 스테이지 테마: 남수원중(아침 등굣길) -> 매원중(점심 복도) -> 호매실중(석양 하굣길)
          * ============================================================================
          */
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -485,16 +524,97 @@
         const centerComboText = document.getElementById("centerComboText");
         const feverBadge = document.getElementById("feverBadge");
 
-        // -------------------- 1. Firebase 초기화 및 실시간 TOP 10 랭킹 매니저 --------------------
+        const killerZLiveBox = document.getElementById("killerZLiveBox");
+        const killerZAvatar = document.getElementById("killerZAvatar");
+        const killerZQuote = document.getElementById("killerZQuote");
+        const themeTag = document.getElementById("themeTag");
+
+        // -------------------- 1. 칭호(등급) 계산기 --------------------
+        function getRankTitle(score, isAllCleared) {
+            if (score >= 12000) return { label: "인간 버니어캘리퍼스", color: "bg-purple-700 text-yellow-300" };
+            if (score >= 8500 || isAllCleared) return { label: "수원 일대 전설", color: "bg-red-600 text-yellow-300" };
+            if (score >= 5500) return { label: "선도부 에이스", color: "bg-orange-600 text-white" };
+            if (score >= 2500) return { label: "교문 파수꾼", color: "bg-blue-600 text-white" };
+            return { label: "수습 단속반", color: "bg-stone-700 text-gray-200" };
+        }
+
+        // -------------------- 2. 킬러Z 표정 & 말풍선 연출 매니저 --------------------
+        const KILLER_Z_QUOTES = {
+            START: ["어디 쫄바지 놈들 나와봐라!", "내 눈은 속일 수 없다!", "7.8인치 미만은 전부 싸대기다!"],
+            SLAP: ["짝!! 핏 살리려다 뺨 맞았죠?", "바지통이 그게 뭐냐! 정신 차려!", "7.8 미만 검거 완료!!", "시원하게 참교육 완료!"],
+            PASS: ["좋아, 통 넓은 모범생이군!", "시원시원하게 통과시켜!", "7.8 초과 합격! 지나가라!"],
+            COMBO5: ["슬슬 손목이 풀리는군! (+1.5초)", "5콤보! 내 눈은 레이저 줄자다!"],
+            FEVER: ["폭주 모드 발동!! 다 덤벼라!!", "점수 2배! 수원 일대를 평정한다!!"],
+            WRONG: ["윽! 선도부 쌤이 노려보신다!!", "방금 건 내 눈이 살짝 삐끗했다..."]
+        };
+
+        function updateKillerZLive(mood, customText = null) {
+            if (!killerZAvatar || !killerZQuote) return;
+
+            let bgFill = "#FEF08A";
+            let eyeSvg = `
+                <polygon points="32,56 57,56 53,70 35,70" fill="#000"/>
+                <polygon points="63,56 88,56 85,70 67,70" fill="#000"/>
+                <line x1="57" y1="60" x2="63" y2="60" stroke="#000" stroke-width="4"/>
+            `;
+            let mouthSvg = `<path d="M46 80 Q60 90 74 80" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>`;
+            let extraSvg = "";
+
+            if (mood === "FEVER") {
+                bgFill = "#FCA5A5";
+                // 폭주 붉은 안광
+                eyeSvg = `
+                    <polygon points="32,56 57,56 53,70 35,70" fill="#000"/>
+                    <polygon points="63,56 88,56 85,70 67,70" fill="#000"/>
+                    <circle cx="44" cy="63" r="5" fill="#EF4444"/>
+                    <circle cx="75" cy="63" r="5" fill="#EF4444"/>
+                    <line x1="20" y1="63" x2="99" y2="63" stroke="#EF4444" stroke-width="2.5"/>
+                `;
+                mouthSvg = `<path d="M42 78 Q60 96 78 78 Z" fill="#DC2626" stroke="#000" stroke-width="3.5"/>`;
+            } else if (mood === "WRONG") {
+                bgFill = "#CBD5E1";
+                // 당황 표정 & 식은땀
+                eyeSvg = `
+                    <line x1="36" y1="56" x2="52" y2="70" stroke="#000" stroke-width="4"/>
+                    <line x1="52" y1="56" x2="36" y2="70" stroke="#000" stroke-width="4"/>
+                    <line x1="68" y1="56" x2="84" y2="70" stroke="#000" stroke-width="4"/>
+                    <line x1="84" y1="56" x2="68" y2="70" stroke="#000" stroke-width="4"/>
+                `;
+                mouthSvg = `<path d="M44 86 Q60 74 76 86" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>`;
+                extraSvg = `<path d="M92 48 Q98 58 92 64 Q86 58 92 48 Z" fill="#38BDF8" stroke="#000" stroke-width="2"/>`;
+            } else if (mood === "SLAP") {
+                mouthSvg = `<path d="M44 78 Q60 94 76 78 Z" fill="#EF4444" stroke="#000" stroke-width="3.5"/>`;
+            }
+
+            killerZAvatar.innerHTML = `
+                <svg viewBox="0 0 120 120" class="w-full h-full">
+                    <circle cx="60" cy="60" r="58" fill="${bgFill}"/>
+                    <circle cx="60" cy="64" r="34" fill="#FDBA74" stroke="#000" stroke-width="4"/>
+                    <rect x="26" y="42" width="68" height="11" rx="4" fill="#DC2626" stroke="#000" stroke-width="3"/>
+                    <path d="M26 44 C26 20, 94 20, 94 44 Z" fill="#1E293B" stroke="#000" stroke-width="4"/>
+                    ${eyeSvg}
+                    ${mouthSvg}
+                    ${extraSvg}
+                </svg>
+            `;
+
+            if (customText) {
+                killerZQuote.textContent = customText;
+            } else {
+                const pool = KILLER_Z_QUOTES[mood] || KILLER_Z_QUOTES.START;
+                killerZQuote.textContent = pool[Math.floor(Math.random() * pool.length)];
+            }
+        }
+
+        // -------------------- 3. Firebase 초기화 및 실시간 TOP 10 랭킹 매니저 --------------------
         const appId = typeof __app_id !== "undefined" ? __app_id : "default-app-id";
         let db = null;
         let auth = null;
         let currentUser = null;
-        let allRankings = []; // DB에 저장된 전체 랭킹(100개 이상) 보관
+        let allRankings = [];
         let latestInsertedDocId = null;
         let unsubscribeRankings = null;
 
-        // 마지막으로 사용한 닉네임 복원
         const savedNickname = localStorage.getItem("namsuwon_last_nickname");
         const nicknameInputEl = document.getElementById("nicknameInput");
         if (savedNickname && nicknameInputEl) {
@@ -543,7 +663,6 @@
             if (countEl) countEl.textContent = "오프라인 모드 (연결 대기 중)";
         }
 
-        // Firestore에는 100개 이상 전체 데이터를 무제한 저장/유지하고, 정렬 후 상위 10개만 화면에 표시
         function subscribeToRankings() {
             if (!db || !currentUser) return;
             if (unsubscribeRankings) {
@@ -565,12 +684,12 @@
                             score: Number(data.score) || 0,
                             maxCombo: Number(data.maxCombo) || 0,
                             stageReached: data.stageReached || "남수원중",
+                            rankTitle: data.rankTitle || getRankTitle(Number(data.score) || 0, false).label,
                             uid: data.uid || "",
                             createdAtMs: Number(data.createdAtMs) || 0
                         });
                     });
 
-                    // 점수 내림차순 정렬 (동점 시 최대 콤보 내림차순 -> 먼저 달성한 순)
                     list.sort((a, b) => {
                         if (b.score !== a.score) return b.score - a.score;
                         if (b.maxCombo !== a.maxCombo) return b.maxCombo - a.maxCombo;
@@ -598,7 +717,6 @@
 
             const nickname = nicknameInput.value.trim();
 
-            // 유저가 직접 닉네임을 입력하도록 검증
             if (!nickname) {
                 statusTag.textContent = "⚠️ 닉네임을 먼저 입력해주세요!";
                 statusTag.className = "text-xs text-red-600 font-bold";
@@ -620,7 +738,6 @@
             btnSubmit.textContent = "등록 중...";
 
             try {
-                // 입력한 닉네임 로컬 기억
                 localStorage.setItem("namsuwon_last_nickname", nickname);
 
                 const rankingsCol = collection(db, "artifacts", appId, "public", "data", "namsuwon_rankings");
@@ -628,12 +745,14 @@
                 const reachedSchool = state.isAllCleared
                     ? "호매실중(완전정복)"
                     : safeStageObj.school;
+                const titleInfo = getRankTitle(state.score, state.isAllCleared);
 
                 const docRef = await addDoc(rankingsCol, {
                     nickname,
                     score: state.score,
                     maxCombo: state.maxCombo,
                     stageReached: reachedSchool,
+                    rankTitle: titleInfo.label,
                     uid: currentUser.uid,
                     createdAtMs: Date.now(),
                     createdAt: serverTimestamp()
@@ -646,7 +765,6 @@
                 btnSubmit.textContent = "등록 완료";
                 btnSubmit.className = "bg-green-600 text-white font-comic text-sm px-4 py-2 rounded-xl comic-border-sm";
 
-                // 등록 후 바로 랭킹 모달 열어서 TOP 10 및 본인 전체 순위 확인
                 openRankingModal();
             } catch (err) {
                 console.error("점수 등록 실패:", err);
@@ -662,7 +780,6 @@
             const myBestBadge = document.getElementById("myBestRankBadge");
             if (!container || !totalCountEl || !myBestBadge) return;
 
-            // 전체 등록 개수는 100개 이상 모두 카운트 표시
             totalCountEl.textContent = `전체 등록 기록: 총 ${allRankings.length.toLocaleString()}명`;
 
             if (allRankings.length === 0) {
@@ -675,7 +792,6 @@
                 return;
             }
 
-            // 전체 랭킹(100위 밖 포함)에서 내 최고 순위 계산
             let myBestRank = -1;
             if (currentUser) {
                 const idx = allRankings.findIndex(
@@ -685,7 +801,6 @@
             }
             myBestBadge.textContent = myBestRank !== -1 ? `내 전체 순위: ${myBestRank}위` : "내 순위: 미등록";
 
-            // 화면에는 상위 10개(TOP 10)만 표시
             const top10Rankings = allRankings.slice(0, 10);
             const fragment = document.createDocumentFragment();
 
@@ -713,9 +828,10 @@
                             ${medal}
                         </span>
                         <div class="min-w-0 text-left">
-                            <div class="font-bold text-sm sm:text-base text-gray-900 truncate flex items-center gap-1">
+                            <div class="font-bold text-sm sm:text-base text-gray-900 truncate flex items-center gap-1.5">
                                 <span>${escapeHtml(item.nickname)}</span>
-                                ${isMine ? '<span class="bg-red-600 text-white text-[10px] px-1.5 py-0.2 rounded">ME</span>' : ""}
+                                <span class="bg-stone-800 text-yellow-300 text-[10px] px-1.5 py-0.2 rounded font-comic shrink-0">${escapeHtml(item.rankTitle)}</span>
+                                ${isMine ? '<span class="bg-red-600 text-white text-[10px] px-1.5 py-0.2 rounded shrink-0">ME</span>' : ""}
                             </div>
                             <div class="text-[11px] text-gray-500 font-bold">
                                 ${escapeHtml(item.stageReached)} · 최고 ${item.maxCombo}콤보
@@ -752,7 +868,7 @@
             if (modal) modal.classList.add("hidden");
         }
 
-        // -------------------- 2. 사운드 시스템 (Web Audio API 효과음 합성) --------------------
+        // -------------------- 4. 사운드 시스템 (Web Audio API 효과음 합성) --------------------
         class SoundEffects {
             constructor() {
                 this.enabled = true;
@@ -911,34 +1027,40 @@
 
         const sfx = new SoundEffects();
 
-        // -------------------- 3. 스테이지 및 게임 설정 --------------------
+        // -------------------- 5. 스테이지 및 테마 차별화 설정 --------------------
         const STAGES = [
             {
                 id: 1,
                 school: "남수원중",
                 badge: "STAGE 1: 남수원중",
+                themeLabel: "☀️ 아침 등굣길 정문",
+                themeKey: "MORNING",
                 quota: 14,
                 timeLimit: 30.0,
                 tightRange: [5.6, 7.4],
                 wideRange: [8.2, 10.2],
                 clearTitle: "남수원중 단속 완료!",
-                clearStory: "선도부 선생님이 도착하기 직전 남수원중을 평정했다!\n강력한 손맛을 각성한 킬러Z, 이제 옆 동네 <strong>매원중</strong>으로 침공한다!"
+                clearStory: "선도부 선생님이 도착하기 직전 남수원중을 평정했다!\n강력한 손맛을 각성한 킬러Z, 점심시간의 <strong>매원중 복도</strong>로 침공한다!"
             },
             {
                 id: 2,
                 school: "매원중",
                 badge: "STAGE 2: 매원중",
+                themeLabel: "🏫 점심시간 실내 복도",
+                themeKey: "HALLWAY",
                 quota: 18,
                 timeLimit: 30.0,
                 tightRange: [6.4, 7.6],
                 wideRange: [8.0, 9.4],
                 clearTitle: "매원중 정복 성공!",
-                clearStory: "매원중의 교묘한 세미 쫄바지까지 모두 꿰뚫어 본 킬러Z!\n이제 마지막 최후의 보루 <strong>호매실중</strong>으로 진격한다!"
+                clearStory: "매원중의 교묘한 세미 쫄바지까지 모두 꿰뚫어 본 킬러Z!\n이제 노을이 지는 최후의 결전지 <strong>호매실중 하굣길</strong>로 진격한다!"
             },
             {
                 id: 3,
                 school: "호매실중",
                 badge: "STAGE 3: 호매실중",
+                themeLabel: "🌇 하굣길 노을 교문",
+                themeKey: "SUNSET",
                 quota: 22,
                 timeLimit: 30.0,
                 tightRange: [6.8, 7.7],
@@ -959,7 +1081,7 @@
         const SLAP_CALLOUTS = ["짝!! 쫄바지 응징!", "풀스윙 작렬!!", "참교육 완료!!", "완벽한 손맛!!", "쫄바지 정화!"];
         const PASS_CALLOUTS = ["패스! 정상 바지!", "나이스 통과!", "7.8 초과 합격!", "시원하게 패스!"];
 
-        // -------------------- 4. 게임 상태 관리 --------------------
+        // -------------------- 6. 게임 상태 관리 --------------------
         const state = {
             status: "TITLE",
             stageIndex: 0,
@@ -976,6 +1098,7 @@
             hasSubmittedRank: false,
             currentStudent: null,
             lastTime: 0,
+            hitStopTimer: 0, // 타격 순간 일시정지 타이머
             animOffsetX: 0,
             animOffsetY: 0,
             animRotation: 0,
@@ -989,7 +1112,7 @@
             rulerReveal: null
         };
 
-        // -------------------- 5. 캔버스 반응형 크기 조절 및 호환성 헬퍼 --------------------
+        // -------------------- 7. 캔버스 반응형 크기 조절 및 호환성 헬퍼 --------------------
         function drawRoundRect(ctx, x, y, w, h, r) {
             const radius = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
             ctx.beginPath();
@@ -1022,7 +1145,7 @@
 
         window.addEventListener("resize", resizeCanvas);
 
-        // -------------------- 6. 학생 다리 데이터 생성기 --------------------
+        // -------------------- 8. 학생 다리 데이터 생성기 --------------------
         function generateStudent(stage) {
             const safeStage = stage || STAGES[Math.min(state.stageIndex, STAGES.length - 1)] || STAGES[0];
             const isTight = Math.random() < 0.52;
@@ -1059,7 +1182,7 @@
             };
         }
 
-        // -------------------- 7. 학생 다리 일러스트 및 타격 이펙트 렌더링 --------------------
+        // -------------------- 9. 스테이지별 테마 배경 & 캐릭터 일러스트 렌더링 --------------------
         function renderScene() {
             if (!canvasWrapper || !ctx) return;
             const width = canvasWrapper.clientWidth;
@@ -1074,7 +1197,7 @@
             if (student) {
                 ctx.save();
                 ctx.globalAlpha = Math.max(0, Math.min(1, state.animAlpha));
-                ctx.translate(width / 2 + state.animOffsetX, height * 0.5 + state.animOffsetY);
+                ctx.translate(width / 2 + state.animOffsetX, height * 0.52 + state.animOffsetY);
                 ctx.rotate(student.poseTilt + state.animRotation);
 
                 const scale = Math.min(width / 380, height / 520);
@@ -1097,18 +1220,79 @@
         }
 
         function drawSchoolBackground(w, h) {
+            const stage = STAGES[Math.min(state.stageIndex, STAGES.length - 1)] || STAGES[0];
             const floorY = h * 0.76;
-            ctx.fillStyle = state.combo >= 10 ? "#FED7AA" : "#D6D3D1";
+
+            // 스테이지별 상단 배경 테마 차별화
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, floorY);
+            if (stage.themeKey === "MORNING") {
+                // 1스테이지 남수원중: 상쾌한 아침 등굣길 하늘
+                skyGrad.addColorStop(0, "#7DD3FC");
+                skyGrad.addColorStop(0.65, "#E0F2FE");
+                skyGrad.addColorStop(1, "#FEF9C3");
+            } else if (stage.themeKey === "HALLWAY") {
+                // 2스테이지 매원중: 점심시간 따뜻한 실내 복도 벽면
+                skyGrad.addColorStop(0, "#FEF3C7");
+                skyGrad.addColorStop(0.6, "#FDE68A");
+                skyGrad.addColorStop(1, "#D97706");
+            } else {
+                // 3스테이지 호매실중: 하굣길 노을 지는 석양 하늘
+                skyGrad.addColorStop(0, "#4C1D95");
+                skyGrad.addColorStop(0.45, "#DB2777");
+                skyGrad.addColorStop(0.85, "#F97316");
+                skyGrad.addColorStop(1, "#FACC15");
+            }
+
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, w, floorY);
+
+            // 스테이지별 배경 디테일 소품
+            if (stage.themeKey === "MORNING") {
+                // 아침 햇살 원
+                ctx.fillStyle = "rgba(254, 240, 138, 0.7)";
+                ctx.beginPath();
+                ctx.arc(w * 0.82, h * 0.16, 36, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (stage.themeKey === "HALLWAY") {
+                // 복도 창문 & 사물함 실루엣
+                ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+                ctx.fillRect(w * 0.12, h * 0.18, w * 0.24, h * 0.26);
+                ctx.fillRect(w * 0.64, h * 0.18, w * 0.24, h * 0.26);
+                // 하단 우드 몰딩
+                ctx.fillStyle = "#92400E";
+                ctx.fillRect(0, floorY - 38, w, 38);
+            } else {
+                // 석양 커다란 해
+                ctx.fillStyle = "rgba(253, 224, 71, 0.85)";
+                ctx.beginPath();
+                ctx.arc(w * 0.5, floorY - 25, 58, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 바닥 컬러 (피버 모드일 땐 붉은/주황 오라 바닥)
+            if (state.combo >= 10) {
+                ctx.fillStyle = "#FED7AA";
+            } else if (stage.themeKey === "MORNING") {
+                ctx.fillStyle = "#D6D3D1";
+            } else if (stage.themeKey === "HALLWAY") {
+                ctx.fillStyle = "#B45309";
+            } else {
+                ctx.fillStyle = "#334155";
+            }
             ctx.fillRect(0, floorY, w, h - floorY);
 
-            ctx.strokeStyle = "#78716C";
+            // 지평선
+            ctx.strokeStyle = "#1E293B";
             ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.moveTo(0, floorY);
             ctx.lineTo(w, floorY);
             ctx.stroke();
 
-            ctx.strokeStyle = "rgba(120, 113, 108, 0.25)";
+            // 원근 바닥 타일/아스팔트 선
+            ctx.strokeStyle = stage.themeKey === "SUNSET"
+                ? "rgba(255, 255, 255, 0.18)"
+                : "rgba(0, 0, 0, 0.18)";
             ctx.lineWidth = 2;
             for (let i = -3; i <= 3; i++) {
                 ctx.beginPath();
@@ -1118,7 +1302,9 @@
             }
 
             const barY = h * 0.85;
-            ctx.strokeStyle = "rgba(0, 0, 0, 0.18)";
+            ctx.strokeStyle = stage.themeKey === "SUNSET"
+                ? "rgba(250, 204, 21, 0.35)"
+                : "rgba(0, 0, 0, 0.18)";
             ctx.lineWidth = 2;
             ctx.setLineDash([6, 6]);
             ctx.beginPath();
@@ -1143,7 +1329,7 @@
             const ankleY = 105;
             const shoeBottomY = 148;
 
-            ctx.fillStyle = "rgba(0, 0, 0, 0.22)";
+            ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
             ctx.beginPath();
             ctx.ellipse(0, shoeBottomY + 4, 115, 18, 0, 0, Math.PI * 2);
             ctx.fill();
@@ -1495,7 +1681,7 @@
             ctx.restore();
         }
 
-        // -------------------- 8. 판정 로직 및 콤보 손맛 연출 --------------------
+        // -------------------- 10. 판정 로직 및 히트스톱/콤보 손맛 연출 --------------------
         let isProcessingAction = false;
 
         function spawnShockwave() {
@@ -1533,10 +1719,10 @@
 
         function triggerMilestoneCutin(combo) {
             const milestones = {
-                5: { text: "🔥 5 COMBO! 손이 풀리기 시작했다!", bg: "bg-orange-500 text-white" },
-                10: { text: "⚡ 10 COMBO! 킬러Z 폭주 모드 발동 (점수 2배!) ⚡", bg: "bg-red-600 text-yellow-300" },
-                15: { text: "💥 15 COMBO! 전설의 매의 눈 각성!!", bg: "bg-purple-700 text-yellow-300" },
-                20: { text: "👑 20 COMBO! 인간 자로봇 경지 도달!!", bg: "bg-black text-yellow-400" }
+                5: { text: "🔥 5 COMBO! 시간 +1.5초 보너스!!", bg: "bg-orange-500 text-white" },
+                10: { text: "⚡ 10 COMBO! 킬러Z 폭주 모드 (점수 2배 +1.5초!) ⚡", bg: "bg-red-600 text-yellow-300" },
+                15: { text: "💥 15 COMBO! 전설의 매의 눈 각성 (+1.5초)!!", bg: "bg-purple-700 text-yellow-300" },
+                20: { text: "👑 20 COMBO! 인간 자로봇 경지 도달 (+1.5초)!!", bg: "bg-black text-yellow-400" }
             };
 
             const info = milestones[combo];
@@ -1544,7 +1730,7 @@
 
             sfx.playFeverUp();
             const banner = document.createElement("div");
-            banner.className = `cutin-banner px-4 py-1.5 rounded-xl comic-border-sm font-title text-base sm:text-lg ${info.bg} shadow-xl whitespace-nowrap`;
+            banner.className = `cutin-banner px-4 py-1.5 rounded-xl comic-border-sm font-title text-sm sm:text-base ${info.bg} shadow-xl whitespace-nowrap`;
             banner.textContent = info.text;
             cutinOverlay.innerHTML = "";
             cutinOverlay.appendChild(banner);
@@ -1565,6 +1751,14 @@
                 state.combo++;
                 if (state.combo > state.maxCombo) state.maxCombo = state.combo;
 
+                // 5콤보 배수 달성 시 시간 +1.5초 보너스!
+                let timeBonusAdded = false;
+                if (state.combo > 0 && state.combo % 5 === 0) {
+                    const maxStageTime = (STAGES[state.stageIndex] || STAGES[0]).timeLimit;
+                    state.timeLeft = Math.min(maxStageTime, state.timeLeft + 1.5);
+                    timeBonusAdded = true;
+                }
+
                 const isFever = state.combo >= 10;
                 const multiplier = isFever ? 2 : 1;
                 const comboBonus = Math.min(state.combo * 25, 250);
@@ -1578,16 +1772,20 @@
                     sfx.playSlap(state.combo);
                     state.totalSlaps++;
                     state.slapHandAnim = 1.0;
+                    // 타격 순간 0.045초 히트스톱으로 묵직한 타격감 부여
+                    state.hitStopTimer = 0.045;
                     spawnShockwave();
                     triggerScreenShake();
-                    state.knockbackVx = 1650;
-                    state.knockbackVy = -480;
-                    state.knockbackSpin = 7.5;
+                    state.knockbackVx = 1750;
+                    state.knockbackVy = -500;
+                    state.knockbackSpin = 8.0;
+
+                    updateKillerZLive(isFever ? "FEVER" : "SLAP");
 
                     const callout = SLAP_CALLOUTS[Math.floor(Math.random() * SLAP_CALLOUTS.length)];
                     showFloatingFeedback(
                         callout,
-                        `${student.inches.toFixed(1)}인치 (7.8 미만)${isFever ? " · 2X FEVER!" : ""}`,
+                        `${student.inches.toFixed(1)}인치${isFever ? " · 2X FEVER!" : ""}${timeBonusAdded ? " · +1.5초!" : ""}`,
                         "bg-red-600 text-yellow-300"
                     );
                 } else {
@@ -1597,10 +1795,12 @@
                     state.knockbackVy = 0;
                     state.knockbackSpin = -0.35;
 
+                    updateKillerZLive(isFever ? "FEVER" : "PASS");
+
                     const callout = PASS_CALLOUTS[Math.floor(Math.random() * PASS_CALLOUTS.length)];
                     showFloatingFeedback(
                         callout,
-                        `${student.inches.toFixed(1)}인치 (7.8 초과)${isFever ? " · 2X FEVER!" : ""}`,
+                        `${student.inches.toFixed(1)}인치${isFever ? " · 2X FEVER!" : ""}${timeBonusAdded ? " · +1.5초!" : ""}`,
                         "bg-blue-600 text-white"
                     );
                 }
@@ -1614,6 +1814,7 @@
                 triggerPenaltyFlash();
                 state.combo = 0;
                 state.timeLeft = Math.max(0, state.timeLeft - 2.0);
+                updateKillerZLive("WRONG");
 
                 const reason = student.isTight
                     ? `놓쳤다! ${student.inches.toFixed(1)}인치 쫄바지였음! (-2초)`
@@ -1653,7 +1854,7 @@
                 state.animOffsetX = action === "PASS" ? 110 : -110;
                 state.animAlpha = 0.25;
                 isProcessingAction = false;
-            }, 230);
+            }, 240);
         }
 
         function triggerScreenShake() {
@@ -1685,7 +1886,7 @@
             feedbackOverlay.appendChild(el);
         }
 
-        // -------------------- 9. 게임 루프 및 타이머 --------------------
+        // -------------------- 11. 게임 루프 및 타이머 --------------------
         function gameLoop(timestamp) {
             if (!state.lastTime) state.lastTime = timestamp;
             const dt = Math.min(0.1, (timestamp - state.lastTime) / 1000);
@@ -1701,33 +1902,38 @@
                     return;
                 }
 
-                if (state.knockbackVx !== 0 || state.knockbackVy !== 0) {
-                    state.animOffsetX += state.knockbackVx * dt;
-                    state.animOffsetY += state.knockbackVy * dt;
-                    state.animRotation += state.knockbackSpin * dt;
-                    state.animAlpha = Math.max(0, state.animAlpha - dt * 3.2);
+                // 히트스톱 중일 때는 타격 포즈를 찰나 동안 고정
+                if (state.hitStopTimer > 0) {
+                    state.hitStopTimer -= dt;
                 } else {
-                    state.animOffsetX *= Math.pow(0.0005, dt);
-                    if (Math.abs(state.animOffsetX) < 0.5) state.animOffsetX = 0;
-                    state.animAlpha = Math.min(1, state.animAlpha + dt * 8);
-                }
+                    if (state.knockbackVx !== 0 || state.knockbackVy !== 0) {
+                        state.animOffsetX += state.knockbackVx * dt;
+                        state.animOffsetY += state.knockbackVy * dt;
+                        state.animRotation += state.knockbackSpin * dt;
+                        state.animAlpha = Math.max(0, state.animAlpha - dt * 3.2);
+                    } else {
+                        state.animOffsetX *= Math.pow(0.0005, dt);
+                        if (Math.abs(state.animOffsetX) < 0.5) state.animOffsetX = 0;
+                        state.animAlpha = Math.min(1, state.animAlpha + dt * 8);
+                    }
 
-                if (state.slapHandAnim > 0) {
-                    state.slapHandAnim = Math.max(0, state.slapHandAnim - dt * 4.0);
-                }
+                    if (state.slapHandAnim > 0) {
+                        state.slapHandAnim = Math.max(0, state.slapHandAnim - dt * 4.0);
+                    }
 
-                for (let i = state.shockwaveRings.length - 1; i >= 0; i--) {
-                    const ring = state.shockwaveRings[i];
-                    ring.radius += 520 * dt;
-                    ring.alpha -= 2.8 * dt;
-                    if (ring.alpha <= 0) state.shockwaveRings.splice(i, 1);
-                }
+                    for (let i = state.shockwaveRings.length - 1; i >= 0; i--) {
+                        const ring = state.shockwaveRings[i];
+                        ring.radius += 520 * dt;
+                        ring.alpha -= 2.8 * dt;
+                        if (ring.alpha <= 0) state.shockwaveRings.splice(i, 1);
+                    }
 
-                for (let i = state.windLines.length - 1; i >= 0; i--) {
-                    const line = state.windLines[i];
-                    line.x -= 950 * dt;
-                    line.alpha -= 3.2 * dt;
-                    if (line.alpha <= 0) state.windLines.splice(i, 1);
+                    for (let i = state.windLines.length - 1; i >= 0; i--) {
+                        const line = state.windLines[i];
+                        line.x -= 950 * dt;
+                        line.alpha -= 3.2 * dt;
+                        if (line.alpha <= 0) state.windLines.splice(i, 1);
+                    }
                 }
 
                 updateHud();
@@ -1744,6 +1950,7 @@
             document.getElementById("stageBadge").textContent = stage.badge;
             document.getElementById("quotaDisplay").textContent = `목표: ${state.stageInspected} / ${stage.quota}명`;
             document.getElementById("scoreDisplay").textContent = state.score.toLocaleString();
+            if (themeTag) themeTag.textContent = stage.themeLabel;
 
             const comboBadge = document.getElementById("comboBadge");
             if (state.combo >= 2) {
@@ -1791,7 +1998,7 @@
             }
         }
 
-        // -------------------- 10. 스테이지 흐름 제어 --------------------
+        // -------------------- 12. 스테이지 흐름 제어 --------------------
         function startGame() {
             sfx.init();
             state.stageIndex = 0;
@@ -1813,6 +2020,8 @@
             touchZones.classList.remove("hidden");
             ruleBanner.classList.remove("hidden");
             gameControls.classList.remove("hidden");
+            killerZLiveBox.classList.remove("hidden");
+            themeTag.classList.remove("hidden");
 
             resizeCanvas();
             startStage(0);
@@ -1828,6 +2037,7 @@
             state.stageCorrect = 0;
             state.rulerReveal = null;
             state.slapHandAnim = 0;
+            state.hitStopTimer = 0;
             state.knockbackVx = 0;
             state.knockbackVy = 0;
             state.knockbackSpin = 0;
@@ -1844,6 +2054,7 @@
 
             feedbackOverlay.innerHTML = "";
             cutinOverlay.innerHTML = "";
+            updateKillerZLive(state.combo >= 10 ? "FEVER" : "START", `${stage.school} 단속 개시!`);
             updateHud();
             renderScene();
         }
@@ -1889,6 +2100,12 @@
             const endBadge = document.getElementById("endBadge");
             const endTitle = document.getElementById("endTitle");
             const endDesc = document.getElementById("endDesc");
+            const rankTitleBadge = document.getElementById("rankTitleBadge");
+
+            const titleInfo = getRankTitle(state.score, isVictory);
+            if (rankTitleBadge) {
+                rankTitleBadge.textContent = `🏅 획득 칭호: ${titleInfo.label}`;
+            }
 
             const btnSubmit = document.getElementById("btnSubmitRank");
             const statusTag = document.getElementById("registerStatusTag");
@@ -1903,7 +2120,7 @@
             if (isVictory) {
                 endCard.className = "w-full bg-amber-300 rounded-3xl p-4 sm:p-5 comic-border flex flex-col items-center my-auto";
                 endEmoji.textContent = "👑";
-                endBadge.className = "bg-red-600 text-white font-comic text-xs sm:text-sm px-3 py-1 rounded-full comic-border-sm mb-1.5";
+                endBadge.className = "bg-red-600 text-white font-comic text-xs sm:text-sm px-3 py-1 rounded-full comic-border-sm mb-1";
                 endBadge.textContent = "3개 학교 완전 제패!";
                 endTitle.textContent = "수원 교복 단속 평정!";
                 endDesc.textContent = "남수원중, 매원중, 호매실중의 모든 쫄바지가 킬러Z의 불꽃 싸대기 아래 정화되었습니다!";
@@ -1911,7 +2128,7 @@
                 sfx.playWrong();
                 endCard.className = "w-full bg-slate-200 rounded-3xl p-4 sm:p-5 comic-border flex flex-col items-center my-auto";
                 endEmoji.textContent = "🚨";
-                endBadge.className = "bg-black text-yellow-300 font-comic text-xs sm:text-sm px-3 py-1 rounded-full mb-1.5";
+                endBadge.className = "bg-black text-yellow-300 font-comic text-xs sm:text-sm px-3 py-1 rounded-full mb-1";
                 endBadge.textContent = "선도부 선생님 등장!";
                 endTitle.textContent = "단속 시간 초과!";
                 endDesc.textContent = `${currentSchool} 단속 도중 선도부 선생님이 들이닥쳤습니다! 현재 기록을 명예의 전당에 남겨보세요!`;
@@ -1928,7 +2145,7 @@
             endModal.classList.remove("hidden");
         }
 
-        // -------------------- 11. 이벤트 바인딩 (터치, 클릭, 키보드, 랭킹) --------------------
+        // -------------------- 13. 이벤트 바인딩 --------------------
         function bindEvent(id, event, handler) {
             const el = document.getElementById(id);
             if (el) {
@@ -1956,7 +2173,6 @@
                 e.target.textContent = on ? "🔊 효과음 ON" : "🔇 효과음 OFF";
             });
 
-            // 랭킹 모달 및 등록 버튼 이벤트
             bindEvent("btnOpenRankingFromTitle", "click", openRankingModal);
             bindEvent("btnViewRankingEnd", "click", openRankingModal);
             bindEvent("btnCloseRanking", "click", closeRankingModal);
@@ -1972,16 +2188,12 @@
                 }
             });
 
-            // 하단 큰 버튼 조작
             bindEvent("btnPass", "click", () => handlePlayerAction("PASS"));
             bindEvent("btnSlap", "click", () => handlePlayerAction("SLAP"));
-
-            // 화면 좌/우 영역 직접 터치 및 클릭 조작
             bindEvent("leftTouchZone", "click", () => handlePlayerAction("PASS"));
             bindEvent("rightTouchZone", "click", () => handlePlayerAction("SLAP"));
         }
 
-        // 데스크탑 키보드 방향키 / A, D 키 지원
         window.addEventListener("keydown", (e) => {
             if (state.status !== "PLAYING") return;
             if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
@@ -1993,7 +2205,6 @@
             }
         });
 
-        // 초기화 및 애니메이션 루프 시작
         function bootstrapGame() {
             initEventListeners();
             resizeCanvas();
