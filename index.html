@@ -195,7 +195,7 @@
                         STAGE 1: 남수원중
                     </span>
                     <span id="quotaDisplay" class="bg-white text-black font-bold text-xs sm:text-sm px-2 py-0.5 rounded-lg border-2 border-black">
-                        보스출현: 0 / 1,500점
+                        보스출현: 0 / 15,000점
                     </span>
                 </div>
 
@@ -519,15 +519,10 @@
         /**
          * ============================================================================
          * 남수원의 바지단속 (Namsuwon's Pants Inspection) - Boss Battle & At-Ease Edition
-         * 1. 열중쉬어 자세(뒷짐 진 코믹 포즈) 학생 일러스트 적용
-         * 2. 스테이지별 일정 점수 도달 시 '황금 쫄바지 보스' 등장
-         *    - 패스 선택 시: 뒤돌아 걸어가며 스테이지 즉시 종료
-         *    - 싸대기 선택 시: 보스가 앞으로 걸어나와 표적 중앙 타이밍 3연타 (PERFECT/GREAT/GOOD/MISS)!
-         *      (1타: 싸대기 손바닥 -> 2타: 죽빵 주먹 -> 3타: 어퍼컷 주먹 + 우스꽝스러운 피격 얼굴)
          * ============================================================================
          */
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // -------------------- 0. DOM 요소 참조 --------------------
@@ -560,6 +555,8 @@
         const themeTag = document.getElementById("themeTag");
 
         // -------------------- 1. 칭호(등급) 계산기 --------------------
+        const SCORE_MULT = 2; // 전체 점수 배율
+
         function getRankTitle(score, isAllCleared) {
             if (score >= 50000 * SCORE_MULT) return { label: "조폭 스카우터" };
             if (score >= 45000 * SCORE_MULT || isAllCleared) return { label: "인간 버니어캘리퍼스" };
@@ -636,8 +633,19 @@
         }
 
         // -------------------- 3. Firebase 초기화 및 실시간 TOP 10 랭킹 매니저 --------------------
-        // Firebase 프로젝트의 Firestore 랭킹 경로 구분자
-        const appId = "namsuwon1zin";
+        // 기존 연동 설정 유지: 런타임 __app_id / __firebase_config 우선, 미정의 시 namsuwon1zin 사용
+        const appId = typeof __app_id !== "undefined" ? __app_id : "namsuwon1zin";
+        const RANKING_COLLECTION_NAME = "namsuwon_rankings";
+
+        const fallbackFirebaseConfig = {
+            apiKey: "AIzaSyAAOUP-u_p7xlN841XoWf6T_HRlQDO-g7w",
+            authDomain: "namsuwon1zin.firebaseapp.com",
+            projectId: "namsuwon1zin",
+            storageBucket: "namsuwon1zin.firebasestorage.app",
+            messagingSenderId: "579986511862",
+            appId: "1:579986511862:web:5d7866ece18019e77499d7"
+        };
+
         let db = null;
         let auth = null;
         let currentUser = null;
@@ -651,24 +659,30 @@
             nicknameInputEl.value = savedNickname;
         }
 
-        // Firebase 웹 앱 설정: Firebase Console > 프로젝트 설정 > 내 앱에서 발급된 값
-        const firebaseConfig = {
-            apiKey: "AIzaSyAAOUP-u_p7xlN841XoWf6T_HRlQDO-g7w",
-            authDomain: "namsuwon1zin.firebaseapp.com",
-            projectId: "namsuwon1zin",
-            storageBucket: "namsuwon1zin.firebasestorage.app",
-            messagingSenderId: "579986511862",
-            appId: "1:579986511862:web:5d7866ece18019e77499d7"
-        };
+        function resolveFirebaseConfig() {
+            if (typeof __firebase_config !== "undefined" && __firebase_config) {
+                const parsed = typeof __firebase_config === "string"
+                    ? JSON.parse(__firebase_config)
+                    : __firebase_config;
+                if (parsed && parsed.apiKey) {
+                    return parsed;
+                }
+            }
+            return fallbackFirebaseConfig;
+        }
 
         async function initFirebaseRanking() {
             try {
+                const firebaseConfig = resolveFirebaseConfig();
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                // 별도 회원가입 없이 익명 인증으로 랭킹 등록 권한을 확보합니다.
-                await signInAnonymously(auth);
+                if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
 
                 onAuthStateChanged(auth, (user) => {
                     currentUser = user;
@@ -679,16 +693,12 @@
             } catch (err) {
                 console.error("Firebase 초기화 중 오류:", err);
                 updateRankingStatusFallback();
-                const countEl = document.getElementById("totalRankersCount");
-                if (countEl) {
-                    countEl.textContent = "랭킹 서버 연결 실패 (콘솔 확인)";
-                }
             }
         }
 
         function updateRankingStatusFallback() {
             const countEl = document.getElementById("totalRankersCount");
-            if (countEl) countEl.textContent = "오프라인 모드 (연결 대기 중)";
+            if (countEl) countEl.textContent = "랭킹 서버 연결 실패 (새로고침 시도)";
         }
 
         function subscribeToRankings() {
@@ -698,7 +708,7 @@
                 unsubscribeRankings = null;
             }
 
-            const rankingsCol = collection(db, "artifacts", appId, "public", "data", "namsuwon_rankings_v2");
+            const rankingsCol = collection(db, "artifacts", appId, "public", "data", RANKING_COLLECTION_NAME);
 
             unsubscribeRankings = onSnapshot(
                 rankingsCol,
@@ -706,13 +716,14 @@
                     const list = [];
                     snapshot.forEach((docSnap) => {
                         const data = docSnap.data();
+                        const score = Number(data.score) || 0;
                         list.push({
                             id: docSnap.id,
                             nickname: data.nickname || "이름없는단속반",
-                            score: Number(data.score) || 0,
+                            score,
                             maxCombo: Number(data.maxCombo) || 0,
                             stageReached: data.stageReached || "남수원중",
-                            rankTitle: data.rankTitle || getRankTitle(Number(data.score) || 0, false).label,
+                            rankTitle: data.rankTitle || getRankTitle(score, false).label,
                             uid: data.uid || "",
                             createdAtMs: Number(data.createdAtMs) || 0
                         });
@@ -768,7 +779,7 @@
             try {
                 localStorage.setItem("namsuwon_last_nickname", nickname);
 
-                const rankingsCol = collection(db, "artifacts", appId, "public", "data", "namsuwon_rankings_v2");
+                const rankingsCol = collection(db, "artifacts", appId, "public", "data", RANKING_COLLECTION_NAME);
                 const safeStageObj = STAGES[Math.min(state.stageIndex, STAGES.length - 1)] || STAGES[0];
                 const reachedSchool = state.isAllCleared
                     ? "호매실중(완전정복)"
@@ -965,7 +976,6 @@
                 osc.stop(now + 0.15);
             }
 
-            // 죽빵 & 어퍼컷 묵직한 타격음
             playHeavyPunch(isUppercut = false) {
                 if (!this.enabled) return;
                 this.init();
@@ -1101,10 +1111,7 @@
 
         const sfx = new SoundEffects();
 
-        // 타격감 개선 패치: 기존 PASS/SLAP 규칙과 점수는 그대로 유지.
-        // 보스 출현 목표 점수만 높여 콤보를 충분히 쌓을 시간을 확보.
         // -------------------- 5. 스테이지 및 보스 설정 --------------------
-        const SCORE_MULT = 2; // 전체 점수 배율
         const STAGES = [
             {
                 id: 1,
@@ -1112,7 +1119,8 @@
                 badge: "STAGE 1: 남수원중",
                 themeLabel: "☀️ 아침 등굣길 정문",
                 themeKey: "MORNING",
-                bossScoreThreshold: 7500 * SCORE_MULT, trapChance: 0.12, // 콤보를 충분히 쌓을 수 있도록 보스 출현을 늦춤
+                bossScoreThreshold: 7500 * SCORE_MULT,
+                trapChance: 0.12,
                 bossName: "남수원중 핏불 김태풍",
                 bossHairColor: "#1E293B",
                 timeLimit: 30.0,
@@ -1127,7 +1135,8 @@
                 badge: "STAGE 2: 매원중",
                 themeLabel: "🏫 점심시간 실내 복도",
                 themeKey: "HALLWAY",
-                bossScoreThreshold: 9500 * SCORE_MULT, trapChance: 0.22, // 스테이지 2 보스 출현 완화
+                bossScoreThreshold: 9500 * SCORE_MULT,
+                trapChance: 0.22,
                 bossName: "매원중 스키니 강백호",
                 bossHairColor: "#DC2626",
                 timeLimit: 30.0,
@@ -1142,7 +1151,8 @@
                 badge: "STAGE 3: 호매실중",
                 themeLabel: "🌇 하굣길 노을 교문",
                 themeKey: "SUNSET",
-                bossScoreThreshold: 12000 * SCORE_MULT, trapChance: 0.32, // 스테이지 3 보스 출현 완화
+                bossScoreThreshold: 12000 * SCORE_MULT,
+                trapChance: 0.32,
                 bossName: "호매실중 레깅스 마왕",
                 bossHairColor: "#FACC15",
                 timeLimit: 30.0,
@@ -1174,7 +1184,6 @@
 
         // -------------------- 6. 게임 상태 관리 --------------------
         const state = {
-            // status: TITLE | PLAYING | BOSS_INTRO | BOSS_WALK_FORWARD | BOSS_COMBO | BOSS_PASS_RETREAT | BOSS_OUTRO | STAGE_CLEAR | GAME_OVER
             status: "TITLE",
             stageIndex: 0,
             timeLeft: 30.0,
@@ -1203,15 +1212,14 @@
             shockwaveRings: [],
             windLines: [],
             rulerReveal: null,
-            // 보스전 상태 객체
             boss: {
-                walkProgress: 0,     // 0(하체) -> 1(클로즈업 상반신/얼굴)
-                retreatProgress: 0,  // 패스 시 뒤돌아 퇴장 진행도
-                comboStep: 0,        // 0: 1타 싸대기, 1: 2타 죽빵, 2: 3타 어퍼컷
-                oscPhase: 0,         // 손바닥/주먹 위아래 왕복 위상
-                oscSpeed: 4.8,       // 왕복 속도
-                perfectCount: 0,     // 퍼펙트 횟수 (3회 시 보너스)
-                damageMarks: [],     // 얼굴에 누적되는 우스꽝스러운 피격 자국
+                walkProgress: 0,
+                retreatProgress: 0,
+                comboStep: 0,
+                oscPhase: 0,
+                oscSpeed: 4.8,
+                perfectCount: 0,
+                damageMarks: [],
                 faceShakeX: 0,
                 faceShakeY: 0,
                 faceTilt: 0,
@@ -1258,7 +1266,7 @@
             const safeStage = stage || STAGES[Math.min(state.stageIndex, STAGES.length - 1)] || STAGES[0];
             const isTight = Math.random() < 0.52;
             const trapChance = safeStage.trapChance || 0;
-            const isBorderline = Math.random() < trapChance; // 함정: 경계값 학생
+            const isBorderline = Math.random() < trapChance;
             let inches;
 
             if (isBorderline) {
@@ -1289,8 +1297,6 @@
                 sockColor: Math.random() < 0.65 ? "#FFFFFF" : (Math.random() < 0.5 ? "#111827" : "#CBD5E1"),
                 hasRolledUp: Math.random() < 0.35,
                 poseTilt: (Math.random() - 0.5) * 0.08,
-
-                // 쫄바지 여부와 무관한 순수 노이즈 + 랜덤 함정
                 thighJitter: 0.85 + Math.random() * 0.4,
                 kneeJitter: 0.9 + Math.random() * 0.2,
                 sizeScale: 0.88 + Math.random() * 0.24,
@@ -1331,14 +1337,12 @@
             drawSchoolBackground(width, height);
             drawWindEffects(ctx);
 
-            // 보스전 클로즈업 3연타 배틀 렌더링
             if (state.status === "BOSS_COMBO" || state.status === "BOSS_OUTRO") {
                 drawBossCloseupBattle(ctx, width, height);
                 drawShockwaveRings(ctx);
                 return;
             }
 
-            // 일반 학생 또는 보스 하체/걸어나오는 연출
             const student = state.currentStudent;
             if (student) {
                 ctx.save();
@@ -1380,9 +1384,6 @@
             }
         }
 
-        // -------------------- 콤보 관중 연출 --------------------
-        // 5콤보부터 5콤보 단위로 관중이 한 명씩 늘어납니다.
-        // 최대 8명까지 표시하며, 콤보가 끊기면 관중도 함께 사라집니다.
         function drawComboSpectators(w, floorY) {
             const spectatorCount = Math.min(8, Math.floor(state.combo / 5));
             if (spectatorCount <= 0) return;
@@ -1401,7 +1402,6 @@
                 ctx.translate(x, y + bob);
                 ctx.scale(scale, scale);
 
-                // 머리카락과 얼굴
                 ctx.fillStyle = i % 2 === 0 ? "#3F2A24" : "#5B4636";
                 ctx.beginPath();
                 ctx.arc(0, -43, 10, Math.PI, Math.PI * 2);
@@ -1416,7 +1416,6 @@
                 ctx.lineWidth = 1.3;
                 ctx.stroke();
 
-                // 교복 상의
                 ctx.fillStyle = shirtColors[i];
                 ctx.strokeStyle = "#1F2937";
                 ctx.lineWidth = 1.8;
@@ -1429,7 +1428,6 @@
                 ctx.fill();
                 ctx.stroke();
 
-                // 환호하는 양팔
                 ctx.strokeStyle = "#F8C9A5";
                 ctx.lineWidth = 4;
                 ctx.lineCap = "round";
@@ -1440,7 +1438,6 @@
                 ctx.lineTo(17, -39);
                 ctx.stroke();
 
-                // 작은 환호 표시
                 ctx.fillStyle = "#DC2626";
                 ctx.font = "bold 13px sans-serif";
                 ctx.textAlign = "center";
@@ -1448,7 +1445,6 @@
                 ctx.restore();
             }
 
-            // 관중 수를 콤보와 연결해 한눈에 알아볼 수 있도록 표시
             ctx.fillStyle = "rgba(15, 23, 42, 0.78)";
             drawRoundRect(ctx, 8, floorY - 31, 83, 22, 8);
             ctx.fill();
@@ -1511,7 +1507,6 @@
             }
             ctx.fillRect(0, floorY, w, h - floorY);
 
-            // 콤보가 쌓일수록 구경하는 학생들이 배경에 합류
             drawComboSpectators(w, floorY);
 
             ctx.strokeStyle = "#1E293B";
@@ -1540,7 +1535,6 @@
             const thighWidth = Math.max(thighBase, cuffWidth * 1.05);
             const kneeWidth = (thighWidth + cuffWidth) * 0.5 * (s.kneeJitter || 1);
 
-            // 열중쉬어 자세이므로 다리를 어깨너비로 벌리고 발끝이 바깥을 향함
             const legSpacing = 62;
             const waistY = -205;
             const crotchY = -112;
@@ -1549,13 +1543,11 @@
             const shoeBottomY = 148;
             const hemY = ankleY + (s.hemDrop || 0);
 
-            // 바닥 그림자
             ctx.fillStyle = s.isBoss ? "rgba(234, 179, 8, 0.45)" : "rgba(0, 0, 0, 0.25)";
             ctx.beginPath();
             ctx.ellipse(0, shoeBottomY + 4, 128, 20, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // 황금 보스 아우라 이펙트
             if (s.isBoss) {
                 ctx.save();
                 ctx.strokeStyle = "#FACC15";
@@ -1566,12 +1558,10 @@
                 ctx.restore();
             }
 
-            // 1) 상체 & 열중쉬어 뒷짐 팔 (엉덩이 뒤로 팔꿈치가 벌어지며 뒷짐 진 코믹한 포즈)
             const hipHalfW = Math.max(78 * s.legThicknessMultiplier, 70);
 
-            // 양쪽 벌어진 팔꿈치 (뒷짐 실루엣)
             [-1, 1].forEach((dir) => {
-                ctx.fillStyle = "#1E293B"; // 교복 마이 소매
+                ctx.fillStyle = "#1E293B";
                 ctx.strokeStyle = "#000000";
                 ctx.lineWidth = 3.5;
                 ctx.lineJoin = "round";
@@ -1586,7 +1576,6 @@
                 ctx.fill();
                 ctx.stroke();
 
-                // 흰색 셔츠 소매 끝단 (커프스)
                 ctx.fillStyle = "#FFFFFF";
                 ctx.beginPath();
                 ctx.arc(dir * 16, waistY + 30, 11, 0, Math.PI * 2);
@@ -1594,13 +1583,11 @@
                 ctx.stroke();
             });
 
-            // 2) 양쪽 다리 & 바지통 (열중쉬어 스탠스)
             [-1, 1].forEach((dir) => {
                 const topX = dir * 36;
                 const centerX = dir * legSpacing;
                 const ankleSkinW = 24 * s.legThicknessMultiplier;
 
-                // 발목 피부
                 ctx.fillStyle = "#FDBA74";
                 ctx.strokeStyle = "#000000";
                 ctx.lineWidth = 3;
@@ -1609,7 +1596,6 @@
                 ctx.fill();
                 ctx.stroke();
 
-                // 양말
                 ctx.fillStyle = s.sockColor;
                 ctx.beginPath();
                 ctx.rect(centerX - ankleSkinW / 2 - 1, ankleY + 4, ankleSkinW + 2, 24);
@@ -1621,10 +1607,8 @@
                     ctx.fillRect(centerX - ankleSkinW / 2, ankleY + 8, ankleSkinW, 3);
                 }
 
-                // 신발 (열중쉬어 자세에 맞춰 바깥쪽으로 벌어짐)
                 drawShoe(ctx, centerX, ankleY + 24, dir, s.shoeType);
 
-                // 교복 바지 다리통
                 const topOuterX = topX + dir * (thighWidth * 0.55);
                 const topInnerX = dir * 3;
                 const kneeOuterX = centerX + dir * (kneeWidth * 0.52);
@@ -1655,7 +1639,6 @@
                 ctx.fill();
                 ctx.stroke();
 
-                // 바지 중앙선 / 황금 반짝이 하이라이트
                 ctx.strokeStyle = s.pantsColor.stripe;
                 ctx.lineWidth = s.isBoss ? 3.5 : 2;
                 ctx.beginPath();
@@ -1663,7 +1646,6 @@
                 ctx.lineTo(centerX, hemY - 6);
                 ctx.stroke();
 
-                // 주름 묘사
                 ctx.strokeStyle = s.pantsColor.dark;
                 ctx.lineWidth = 2.2;
                 const wc = s.wrinkleCount || 0;
@@ -1675,7 +1657,7 @@
                     ctx.quadraticCurveTo(centerX, wy + 4, kneeOuterX - 4, wy - 2);
                     ctx.stroke();
                 }
-                // 무릎 줄/패치: 일반 바지에도 동일하게 등장하는 함정
+
                 const kw = kneeWidth * 0.42;
                 if (s.kneePatch === 1) {
                     ctx.strokeStyle = s.pantsColor.stripe;
@@ -1702,7 +1684,6 @@
                 }
             });
 
-            // 가짜 라벨 함정 (실제 폭과 무관, 50%만 맞음)
             if (s.fakeLabel) {
                 ctx.save();
                 ctx.fillStyle = "#FFFFFF";
@@ -1719,7 +1700,6 @@
                 ctx.restore();
             }
 
-            // 3) 골반 & 엉덩이 실루엣
             ctx.fillStyle = s.pantsColor.main;
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 3.5;
@@ -1727,13 +1707,11 @@
             ctx.fill();
             ctx.stroke();
 
-            // 엉덩이 중앙 봉제선
             ctx.beginPath();
             ctx.moveTo(0, waistY + 12);
             ctx.lineTo(0, crotchY);
             ctx.stroke();
 
-            // 벨트 & 버클
             ctx.fillStyle = "#111827";
             ctx.fillRect(-hipHalfW, waistY - 16, hipHalfW * 2, 16);
             ctx.strokeRect(-hipHalfW, waistY - 16, hipHalfW * 2, 16);
@@ -1742,7 +1720,6 @@
             ctx.fillRect(-14, waistY - 18, 28, 20);
             ctx.strokeRect(-14, waistY - 18, 28, 20);
 
-            // 교복 셔츠 & 마이 상단
             ctx.fillStyle = "#FFFFFF";
             drawRoundRect(ctx, -hipHalfW - 4, waistY - 46, hipHalfW * 2 + 8, 30, 6);
             ctx.fill();
@@ -1758,10 +1735,8 @@
             ctx.fill();
             ctx.stroke();
 
-            // 4) 열중쉬어 맞잡은 두 손 (맨 앞에 그려서 뒷짐 진 손이 명확히 보이도록 연출!)
             ctx.save();
             ctx.translate(0, waistY + 34);
-            // 왼손(바닥 쪽)
             ctx.fillStyle = "#FDBA74";
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 3;
@@ -1769,12 +1744,10 @@
             ctx.fill();
             ctx.stroke();
 
-            // 오른손이 왼손을 감싸 쥔 디테일 + 손가락 마디
             drawRoundRect(ctx, -8, -15, 28, 26, 10);
             ctx.fill();
             ctx.stroke();
 
-            // 손가락 선
             ctx.beginPath();
             ctx.moveTo(4, -8);
             ctx.lineTo(18, -8);
@@ -1785,7 +1758,6 @@
             ctx.stroke();
             ctx.restore();
 
-            // 보스 전용 황금 쫄바지 명찰 배지
             if (s.isBoss) {
                 ctx.save();
                 ctx.fillStyle = "#DC2626";
@@ -1912,7 +1884,6 @@
             const scale = Math.min(w / 370, h / 520);
             ctx.scale(scale, scale);
 
-            // 1) 보스 거대한 상반신 교복 (열중쉬어 당당한 어깨)
             ctx.fillStyle = "#7F1D1D";
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 4;
@@ -1920,7 +1891,6 @@
             ctx.fill();
             ctx.stroke();
 
-            // 흰 와이셔츠 V넥 & 황금 넥타이
             ctx.fillStyle = "#FFFFFF";
             ctx.beginPath();
             ctx.moveTo(-42, 75);
@@ -1941,12 +1911,10 @@
             ctx.fill();
             ctx.stroke();
 
-            // 2) 목 & 보스 얼굴
             ctx.fillStyle = "#FDBA74";
             ctx.fillRect(-32, 48, 64, 42);
             ctx.strokeRect(-32, 48, 64, 42);
 
-            // 얼굴 윤곽 (맞을수록 볼이 붓는 코믹 변형)
             const cheekSwellL = b.damageMarks.includes("SLAP") ? 14 : 0;
             const cheekSwellR = b.damageMarks.includes("PUNCH") ? 14 : 0;
             const jawShift = b.damageMarks.includes("UPPERCUT") ? -16 : 0;
@@ -1963,7 +1931,6 @@
             ctx.fill();
             ctx.stroke();
 
-            // 보스 리젠트 불량배 헤어스타일
             ctx.fillStyle = stage.bossHairColor;
             ctx.beginPath();
             ctx.moveTo(-84, -40);
@@ -1975,21 +1942,17 @@
             ctx.fill();
             ctx.stroke();
 
-            // 눈 표현 (피격 누적에 따라 팬더멍 / X눈 / 빙글빙글 눈)
             const hitCount = b.damageMarks.length;
 
-            // 왼쪽 눈
             ctx.save();
             ctx.translate(-34, -15);
             if (hitCount >= 1) {
-                // 거대한 보라색 팬더 멍!
                 ctx.fillStyle = "rgba(107, 33, 168, 0.72)";
                 ctx.beginPath();
                 ctx.ellipse(0, 0, 24, 18, -0.2, 0, Math.PI * 2);
                 ctx.fill();
             }
             if (hitCount >= 3) {
-                // 3타 어퍼컷 이후 기절 X눈
                 ctx.strokeStyle = "#000000";
                 ctx.lineWidth = 4;
                 ctx.beginPath();
@@ -2009,11 +1972,9 @@
             }
             ctx.restore();
 
-            // 오른쪽 눈
             ctx.save();
             ctx.translate(34, -15);
             if (hitCount >= 2) {
-                // 2타 죽빵 맞고 쌍팬더 멍!
                 ctx.fillStyle = "rgba(107, 33, 168, 0.78)";
                 ctx.beginPath();
                 ctx.ellipse(0, 0, 25, 19, 0.2, 0, Math.PI * 2);
@@ -2039,7 +2000,6 @@
             }
             ctx.restore();
 
-            // 일진 눈썹
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 5;
             ctx.beginPath();
@@ -2047,7 +2007,6 @@
             ctx.moveTo(54, -36); ctx.lineTo(16, -26);
             ctx.stroke();
 
-            // 1타 싸대기 자국 (왼쪽 뺨에 시뻘건 손바닥 자국!)
             if (b.damageMarks.includes("SLAP")) {
                 ctx.save();
                 ctx.translate(-56, 22);
@@ -2064,7 +2023,6 @@
                 ctx.restore();
             }
 
-            // 코 & 2타 죽빵 맞은 쌍코피/콧물 연출
             ctx.fillStyle = hitCount >= 2 ? "#EF4444" : "#F59E0B";
             ctx.beginPath();
             ctx.arc(0, 10, hitCount >= 2 ? 12 : 8, 0, Math.PI * 2);
@@ -2072,39 +2030,33 @@
             ctx.stroke();
 
             if (hitCount >= 2) {
-                // 쌍코피 줄줄!
                 ctx.fillStyle = "#DC2626";
-                ctx.beginPath();
-                ctx.roundRect(-8, 18, 5, 24, 3);
-                ctx.roundRect(3, 18, 5, 28, 3);
+                drawRoundRect(ctx, -8, 18, 5, 24, 3);
+                ctx.fill();
+                drawRoundRect(ctx, 3, 18, 5, 28, 3);
                 ctx.fill();
             }
 
-            // 입 & 3타 어퍼컷 맞고 턱 돌아감 + 이빨 날아감
             ctx.save();
             ctx.translate(0, 42 + jawShift * 0.5);
             if (hitCount === 0) {
-                // 썩소
                 ctx.beginPath();
                 ctx.moveTo(-30, 4);
                 ctx.quadraticCurveTo(0, -6, 32, -8);
                 ctx.stroke();
             } else {
-                // 우스꽝스럽게 벌어진 입 & 빠진 앞니
                 ctx.fillStyle = "#7F1D1D";
                 ctx.beginPath();
                 ctx.ellipse(0, 0, 26, 16 + hitCount * 3, hitCount >= 3 ? 0.25 : 0, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
 
-                // 앞니 1개만 남은 코믹 치아
                 ctx.fillStyle = "#FFFFFF";
                 ctx.fillRect(-10, -14, 9, 8);
                 ctx.strokeRect(-10, -14, 9, 8);
             }
             ctx.restore();
 
-            // 3타 어퍼컷 맞으면 머리 위 빙글빙글 별 3개!
             if (hitCount >= 3) {
                 for (let i = 0; i < 3; i++) {
                     const ang = (performance.now() * 0.006) + (i * Math.PI * 2) / 3;
@@ -2116,7 +2068,6 @@
                 }
             }
 
-            // 3) 타이밍 타겟 실루엣(점선) & 위아래로 움직이는 손바닥/주먹 렌더링
             if (state.status === "BOSS_COMBO") {
                 drawBossTimingReticle(ctx);
             }
@@ -2124,34 +2075,29 @@
             ctx.restore();
         }
 
-        // 보스 타이밍 타격 가이드(고정 점선 타겟 + 왕복 이동 무기)
         function drawBossTimingReticle(ctx) {
             const b = state.boss;
-            const step = b.comboStep; // 0: 싸대기(손바닥), 1: 죽빵(주먹), 2: 어퍼컷(턱 아래 주먹)
-            const offsetY = Math.sin(b.oscPhase) * 95; // -95 ~ +95 왕복
+            const step = b.comboStep;
+            const offsetY = Math.sin(b.oscPhase) * 95;
 
             let targetX = 0;
             let targetY = 0;
-            let weaponType = "PALM"; // PALM | FIST | UPPERCUT
+            let weaponType = "PALM";
 
             if (step === 0) {
-                // 1타: 보스 왼쪽 뺨 위 타겟
                 targetX = -56;
                 targetY = 18;
                 weaponType = "PALM";
             } else if (step === 1) {
-                // 2타: 보스 미간/코 정중앙 죽빵 타겟
                 targetX = 0;
                 targetY = 4;
                 weaponType = "FIST";
             } else {
-                // 3타: 보스 턱 바로 아래 어퍼컷 타겟
                 targetX = 0;
                 targetY = 72;
                 weaponType = "UPPERCUT";
             }
 
-            // (A) 고정된 타겟 점선 실루엣 (여기에 맞춰야 함!)
             ctx.save();
             ctx.translate(targetX, targetY);
             ctx.strokeStyle = "#FACC15";
@@ -2173,12 +2119,10 @@
             ctx.fillText("TARGET", 0, -50);
             ctx.restore();
 
-            // (B) 위아래로 움직이는 실제 손바닥 / 주먹 아이콘
             const isAligned = Math.abs(offsetY) <= 16;
             ctx.save();
             ctx.translate(targetX, targetY + offsetY);
 
-            // 정렬되었을 때 황금빛 후광 강조
             if (isAligned) {
                 ctx.fillStyle = "rgba(239, 68, 68, 0.55)";
                 ctx.beginPath();
@@ -2202,13 +2146,11 @@
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 3.5;
 
-            // 손바닥 본체
             ctx.beginPath();
             ctx.ellipse(0, 8, 24, 26, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
 
-            // 다섯 손가락
             const fingers = [
                 { x: -24, y: 2, w: 10, h: 22, r: -0.5 },
                 { x: -14, y: -22, w: 9, h: 28, r: -0.15 },
@@ -2230,7 +2172,6 @@
         function drawCartoonFistIcon(ctx, isUppercut, fillColor) {
             ctx.save();
             if (isUppercut) {
-                // 어퍼컷 위로 솟구치는 화살표 이펙트
                 ctx.fillStyle = "#FACC15";
                 ctx.strokeStyle = "#000000";
                 ctx.lineWidth = 3;
@@ -2251,19 +2192,16 @@
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 3.5;
 
-            // 주먹 덩어리
             drawRoundRect(ctx, -28, -20, 56, 42, 14);
             ctx.fill();
             ctx.stroke();
 
-            // 접힌 네 손가락 마디
             [-18, -6, 6, 18].forEach((kx) => {
                 drawRoundRect(ctx, kx - 6, -20, 12, 22, 6);
                 ctx.fill();
                 ctx.stroke();
             });
 
-            // 엄지손가락 가로지르기
             drawRoundRect(ctx, -22, 0, 34, 12, 6);
             ctx.fill();
             ctx.stroke();
@@ -2391,14 +2329,12 @@
             gameContainer.classList.add("boss-mode");
             updateKillerZLive("BOSS_APPEAR", `${stage.bossName} 등장!! 패스할까, 응징할까?!`);
 
-            // 컷인 배너
             const banner = document.createElement("div");
             banner.className = "cutin-banner px-4 py-2 rounded-xl comic-border-sm font-title text-base sm:text-lg bg-yellow-400 text-red-700 shadow-2xl whitespace-nowrap";
             banner.textContent = `⚠️ WARNING! ${stage.bossName} 출현!! ⚠️`;
             cutinOverlay.innerHTML = "";
             cutinOverlay.appendChild(banner);
 
-            // 하단 버튼 라벨을 보스 선택용으로 변경
             document.getElementById("btnPassTitle").textContent = "👈 보스 패스";
             document.getElementById("btnPassSub").textContent = "그냥 보내고 스테이지 종료";
             document.getElementById("btnSlapTitle").textContent = "👉 보스 싸대기!!";
@@ -2413,7 +2349,6 @@
             isProcessingAction = true;
 
             if (action === "PASS") {
-                // 패스를 누르면 보스가 뒤돌아서 걸어가고 스테이지 종료
                 sfx.playPass(1);
                 state.status = "BOSS_PASS_RETREAT";
                 state.boss.retreatProgress = 0;
@@ -2424,7 +2359,6 @@
                     "bg-blue-600 text-white"
                 );
             } else {
-                // 싸대기를 누르면 보스가 뒤돌아서 앞으로 걸어나오며 3연타 배틀 돌입!
                 sfx.playSlap(10);
                 state.slapHandAnim = 1.0;
                 spawnShockwave();
@@ -2454,7 +2388,6 @@
             state.status = "BOSS_COMBO";
             isProcessingAction = false;
 
-            // UI를 보스 3연타 전용 모드로 전환
             normalControlsGrid.classList.add("hidden");
             btnBossStrike.classList.remove("hidden");
             bossComboGuide.classList.remove("hidden");
@@ -2502,8 +2435,6 @@
             const offsetY = Math.sin(b.oscPhase) * 95;
             const absDiff = Math.abs(offsetY);
 
-            // 타이밍 판정: 화면에 보이는 표적 중앙을 통과할 때만 높은 점수.
-            // 모바일도 고려해 PERFECT는 매우 짧지만, GREAT/GOOD으로도 점수를 얻을 수 있게 구성.
             let grade = "MISS";
             let dmgScore = 0;
             if (absDiff <= 16) {
@@ -2519,7 +2450,6 @@
                 dmgScore = 400;
                 b.perfectCount = 0;
             } else {
-                // 빗맞으면 타격 대신 헛손질: 점수와 보스 피격 누적 없이 코믹 반응만.
                 b.perfectCount = 0;
             }
 
@@ -2532,7 +2462,6 @@
                 spawnShockwave();
             }
 
-            // 판정에 따른 보스 리액션. MISS는 허공을 때리고 보스가 약 올리는 동작.
             if (grade === "MISS") {
                 sfx.playWrong();
                 b.faceShakeX = b.comboStep % 2 === 0 ? 13 : -13;
@@ -2569,7 +2498,6 @@
                 b.faceShakeY = grade === "PERFECT" ? -58 : -42;
                 b.faceTilt = grade === "PERFECT" ? 0.42 : 0.30;
 
-                // 3연타 모두 PERFECT 달성 시 보너스 3,000점!
                 let perfectBonusText = "";
                 if (b.perfectCount === 3) {
                     state.score += 3000 * SCORE_MULT;
@@ -2589,7 +2517,6 @@
             setTimeout(() => {
                 b.comboStep++;
                 if (b.comboStep >= 3) {
-                    // 3연타 완료! 보스 KO 연출 후 스테이지 클리어
                     state.status = "BOSS_OUTRO";
                     bossComboGuide.classList.add("hidden");
                     btnBossStrike.classList.add("hidden");
@@ -2602,7 +2529,6 @@
                         completeStage();
                     }, 750);
                 } else {
-                    // 다음 타는 리듬을 바꿔, 같은 타이밍을 반복 암기하지 못하게 방향을 교차.
                     b.oscPhase = b.comboStep % 2 === 1 ? Math.PI / 2 : -Math.PI / 2;
                     b.oscSpeed += 0.45;
                     updateBossStepGuideUI();
@@ -2674,12 +2600,10 @@
         }
 
         function handlePlayerAction(action) {
-            // 보스 등장 선택 상태일 때 분기
             if (state.status === "BOSS_INTRO") {
                 handleBossChoice(action);
                 return;
             }
-            // 보스 3연타 전투 중일 때 화면/버튼 입력을 타이밍 타격으로 연결
             if (state.status === "BOSS_COMBO") {
                 handleBossTimingStrike();
                 return;
@@ -2722,7 +2646,7 @@
                     sfx.playSlap(state.combo);
                     state.totalSlaps++;
                     state.slapHandAnim = 1.0;
-                    state.hitStopTimer = 0.065; // 짧은 타격 정지로 손맛 강화
+                    state.hitStopTimer = 0.065;
                     spawnShockwave();
                     triggerScreenShake();
                     state.knockbackVx = 1750;
@@ -2779,7 +2703,6 @@
             updateHud();
             renderScene();
 
-            // 스테이지 일정 점수를 넘기면 황금 쫄바지 보스 출현!
             const currentStage = STAGES[state.stageIndex] || STAGES[STAGES.length - 1];
             if (state.stageScoreEarned >= currentStage.bossScoreThreshold) {
                 setTimeout(() => {
@@ -2808,7 +2731,6 @@
 
         function triggerScreenShake(intensity = null) {
             if (!gameContainer) return;
-            // 성공 타격은 콤보가 높을수록 조금 더 강하게, 실패는 기본 강도로.
             const comboScale = intensity == null ? 0.55 : Math.min(1.0, 0.42 + intensity * 0.025);
             gameContainer.style.setProperty("--shake-strength", comboScale.toFixed(2));
             gameContainer.classList.remove("shake-anim");
@@ -2844,7 +2766,6 @@
             const dt = Math.min(0.1, (timestamp - state.lastTime) / 1000);
             state.lastTime = timestamp;
 
-            // 일반 단속 및 보스 조우 중 타이머 감소
             if (state.status === "PLAYING" || state.status === "BOSS_INTRO") {
                 state.timeLeft -= dt;
                 if (state.timeLeft <= 0) {
@@ -2884,7 +2805,6 @@
                 updateHud();
                 renderScene();
             } else if (state.status === "BOSS_PASS_RETREAT") {
-                // 패스 시 보스가 뒤돌아 멀어지며 스테이지 종료
                 state.boss.retreatProgress += dt * 1.45;
                 renderScene();
                 if (state.boss.retreatProgress >= 1.0) {
@@ -2894,7 +2814,6 @@
                     completeStage();
                 }
             } else if (state.status === "BOSS_WALK_FORWARD") {
-                // 싸대기 맞은 보스가 쿵쿵 앞으로 걸어나옴
                 state.boss.walkProgress += dt * 1.55;
                 if (state.slapHandAnim > 0) {
                     state.slapHandAnim = Math.max(0, state.slapHandAnim - dt * 3.5);
@@ -2917,7 +2836,6 @@
                 renderScene();
             }
 
-            // 공통 이펙트(충격파 링, 바람 라인) 업데이트
             for (let i = state.shockwaveRings.length - 1; i >= 0; i--) {
                 const ring = state.shockwaveRings[i];
                 ring.radius += 520 * dt;
