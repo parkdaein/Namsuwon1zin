@@ -561,10 +561,10 @@
 
         // -------------------- 1. 칭호(등급) 계산기 --------------------
         function getRankTitle(score, isAllCleared) {
-            if (score >= 50000) return { label: "조폭 스카우터" };
-            if (score >= 45000 || isAllCleared) return { label: "인간 버니어캘리퍼스" };
-            if (score >= 40000) return { label: "경기지역 선도부" };
-            if (score >= 3000) return { label: "교문 파수꾼" };
+            if (score >= 50000 * SCORE_MULT) return { label: "조폭 스카우터" };
+            if (score >= 45000 * SCORE_MULT || isAllCleared) return { label: "인간 버니어캘리퍼스" };
+            if (score >= 40000 * SCORE_MULT) return { label: "경기지역 선도부" };
+            if (score >= 3000 * SCORE_MULT) return { label: "교문 파수꾼" };
             return { label: "수습 단속반" };
         }
 
@@ -698,7 +698,7 @@
                 unsubscribeRankings = null;
             }
 
-            const rankingsCol = collection(db, "artifacts", appId, "public", "data", "namsuwon_rankings");
+            const rankingsCol = collection(db, "artifacts", appId, "public", "data", "namsuwon_rankings_v2");
 
             unsubscribeRankings = onSnapshot(
                 rankingsCol,
@@ -768,7 +768,7 @@
             try {
                 localStorage.setItem("namsuwon_last_nickname", nickname);
 
-                const rankingsCol = collection(db, "artifacts", appId, "public", "data", "namsuwon_rankings");
+                const rankingsCol = collection(db, "artifacts", appId, "public", "data", "namsuwon_rankings_v2");
                 const safeStageObj = STAGES[Math.min(state.stageIndex, STAGES.length - 1)] || STAGES[0];
                 const reachedSchool = state.isAllCleared
                     ? "호매실중(완전정복)"
@@ -1104,6 +1104,7 @@
         // 타격감 개선 패치: 기존 PASS/SLAP 규칙과 점수는 그대로 유지.
         // 보스 출현 목표 점수만 높여 콤보를 충분히 쌓을 시간을 확보.
         // -------------------- 5. 스테이지 및 보스 설정 --------------------
+        const SCORE_MULT = 2; // 전체 점수 배율
         const STAGES = [
             {
                 id: 1,
@@ -1111,7 +1112,7 @@
                 badge: "STAGE 1: 남수원중",
                 themeLabel: "☀️ 아침 등굣길 정문",
                 themeKey: "MORNING",
-                bossScoreThreshold: 7500, // 콤보를 충분히 쌓을 수 있도록 보스 출현을 늦춤
+                bossScoreThreshold: 7500 * SCORE_MULT, trapChance: 0.12, // 콤보를 충분히 쌓을 수 있도록 보스 출현을 늦춤
                 bossName: "남수원중 핏불 김태풍",
                 bossHairColor: "#1E293B",
                 timeLimit: 30.0,
@@ -1126,7 +1127,7 @@
                 badge: "STAGE 2: 매원중",
                 themeLabel: "🏫 점심시간 실내 복도",
                 themeKey: "HALLWAY",
-                bossScoreThreshold: 9500, // 스테이지 2 보스 출현 완화
+                bossScoreThreshold: 9500 * SCORE_MULT, trapChance: 0.22, // 스테이지 2 보스 출현 완화
                 bossName: "매원중 스키니 강백호",
                 bossHairColor: "#DC2626",
                 timeLimit: 30.0,
@@ -1141,7 +1142,7 @@
                 badge: "STAGE 3: 호매실중",
                 themeLabel: "🌇 하굣길 노을 교문",
                 themeKey: "SUNSET",
-                bossScoreThreshold: 12000, // 스테이지 3 보스 출현 완화
+                bossScoreThreshold: 12000 * SCORE_MULT, trapChance: 0.32, // 스테이지 3 보스 출현 완화
                 bossName: "호매실중 레깅스 마왕",
                 bossHairColor: "#FACC15",
                 timeLimit: 30.0,
@@ -1256,9 +1257,15 @@
         function generateStudent(stage) {
             const safeStage = stage || STAGES[Math.min(state.stageIndex, STAGES.length - 1)] || STAGES[0];
             const isTight = Math.random() < 0.52;
+            const trapChance = safeStage.trapChance || 0;
+            const isBorderline = Math.random() < trapChance; // 함정: 경계값 학생
             let inches;
 
-            if (isTight) {
+            if (isBorderline) {
+                inches = isTight
+                    ? +(7.3 + Math.random() * 0.3).toFixed(1)
+                    : +(8.0 + Math.random() * 0.3).toFixed(1);
+            } else if (isTight) {
                 const [min, max] = safeStage.tightRange;
                 inches = +(min + Math.random() * (max - min)).toFixed(1);
                 if (inches >= 7.8) inches = 7.7;
@@ -1270,11 +1277,6 @@
 
             const legThicknessType = Math.floor(Math.random() * 3);
             const legThicknessMultiplier = legThicknessType === 0 ? 0.84 : (legThicknessType === 1 ? 1.0 : 1.2);
-            const pantsColor = PANTS_COLORS[Math.floor(Math.random() * PANTS_COLORS.length)];
-            const shoeType = SHOE_TYPES[Math.floor(Math.random() * SHOE_TYPES.length)];
-            const sockColor = Math.random() < 0.65 ? "#FFFFFF" : (Math.random() < 0.5 ? "#111827" : "#CBD5E1");
-            const hasRolledUp = Math.random() < 0.35;
-            const poseTilt = (Math.random() - 0.5) * 0.08;
 
             return {
                 isBoss: false,
@@ -1282,11 +1284,22 @@
                 isTight,
                 legThicknessType,
                 legThicknessMultiplier,
-                pantsColor,
-                shoeType,
-                sockColor,
-                hasRolledUp,
-                poseTilt
+                pantsColor: PANTS_COLORS[Math.floor(Math.random() * PANTS_COLORS.length)],
+                shoeType: SHOE_TYPES[Math.floor(Math.random() * SHOE_TYPES.length)],
+                sockColor: Math.random() < 0.65 ? "#FFFFFF" : (Math.random() < 0.5 ? "#111827" : "#CBD5E1"),
+                hasRolledUp: Math.random() < 0.35,
+                poseTilt: (Math.random() - 0.5) * 0.08,
+
+                // 쫄바지 여부와 무관한 순수 노이즈 + 랜덤 함정
+                thighJitter: 0.85 + Math.random() * 0.4,
+                kneeJitter: 0.9 + Math.random() * 0.2,
+                sizeScale: 0.88 + Math.random() * 0.24,
+                hemDrop: Math.random() < 0.4 ? Math.round(Math.random() * 16) : 0,
+                kneePatch: Math.random() < 0.35 ? 1 + Math.floor(Math.random() * 2) : 0,
+                wrinkleCount: Math.floor(Math.random() * 4),
+                wrinkleOffset: Math.random() * 20 - 10,
+                fakeLabel: Math.random() < Math.min(1, trapChance * 1.5)
+                    ? (Math.random() < 0.5 ? "SLIM" : "WIDE") : null
             };
         }
 
@@ -1348,7 +1361,7 @@
                 ctx.translate(width / 2 + state.animOffsetX, height * 0.52 + state.animOffsetY + extraY);
                 ctx.rotate(student.poseTilt + state.animRotation);
 
-                const baseScale = Math.min(width / 380, height / 520) * extraScale;
+                const baseScale = Math.min(width / 380, height / 520) * extraScale * (student.sizeScale || 1);
                 ctx.scale(baseScale, baseScale);
 
                 drawStudentAtEasePose(ctx, student);
@@ -1523,11 +1536,9 @@
         // -------------------- 10. 열중쉬어(뒷짐 진) 자세 학생 일러스트 --------------------
         function drawStudentAtEasePose(ctx, s) {
             const cuffWidth = 46 + (s.inches - 7.8) * 7.2;
-            const thighBase = 56 * s.legThicknessMultiplier;
+            const thighBase = 56 * s.legThicknessMultiplier * (s.thighJitter || 1);
             const thighWidth = Math.max(thighBase, cuffWidth * 1.05);
-            const kneeWidth = s.isTight
-                ? (38 * s.legThicknessMultiplier + cuffWidth) * 0.52
-                : Math.max(44 * s.legThicknessMultiplier, cuffWidth * 0.96);
+            const kneeWidth = (thighWidth + cuffWidth) * 0.5 * (s.kneeJitter || 1);
 
             // 열중쉬어 자세이므로 다리를 어깨너비로 벌리고 발끝이 바깥을 향함
             const legSpacing = 62;
@@ -1536,6 +1547,7 @@
             const kneeY = -12;
             const ankleY = 105;
             const shoeBottomY = 148;
+            const hemY = ankleY + (s.hemDrop || 0);
 
             // 바닥 그림자
             ctx.fillStyle = s.isBoss ? "rgba(234, 179, 8, 0.45)" : "rgba(0, 0, 0, 0.25)";
@@ -1631,8 +1643,8 @@
                     (topInnerX + kneeInnerX) * 0.5, (crotchY + kneeY) * 0.5,
                     kneeInnerX, kneeY
                 );
-                ctx.lineTo(cuffInnerX, ankleY);
-                ctx.lineTo(cuffOuterX, ankleY);
+                ctx.lineTo(cuffInnerX, hemY);
+                ctx.lineTo(cuffOuterX, hemY);
                 ctx.lineTo(kneeOuterX, kneeY);
                 ctx.quadraticCurveTo(
                     (kneeOuterX + topOuterX) * 0.5, (kneeY + waistY) * 0.5,
@@ -1648,23 +1660,36 @@
                 ctx.lineWidth = s.isBoss ? 3.5 : 2;
                 ctx.beginPath();
                 ctx.moveTo(topX, crotchY + 12);
-                ctx.lineTo(centerX, ankleY - 6);
+                ctx.lineTo(centerX, hemY - 6);
                 ctx.stroke();
 
                 // 주름 묘사
                 ctx.strokeStyle = s.pantsColor.dark;
                 ctx.lineWidth = 2.2;
-                if (s.isTight) {
-                    for (let wy = kneeY - 12; wy <= kneeY + 25; wy += 14) {
-                        ctx.beginPath();
-                        ctx.moveTo(cuffInnerX + 4, wy);
-                        ctx.quadraticCurveTo(centerX, wy + 4, cuffOuterX - 4, wy - 2);
-                        ctx.stroke();
-                    }
-                } else {
+                const wc = s.wrinkleCount || 0;
+                const wOff = s.wrinkleOffset || 0;
+                for (let i = 0; i < wc; i++) {
+                    const wy = kneeY - 12 + wOff + i * 14;
                     ctx.beginPath();
-                    ctx.moveTo(cuffInnerX + 5, ankleY - 14);
-                    ctx.quadraticCurveTo(centerX, ankleY - 6, cuffOuterX - 5, ankleY - 16);
+                    ctx.moveTo(kneeInnerX + 4, wy);
+                    ctx.quadraticCurveTo(centerX, wy + 4, kneeOuterX - 4, wy - 2);
+                    ctx.stroke();
+                }
+                // 무릎 줄/패치: 일반 바지에도 동일하게 등장하는 함정
+                const kw = kneeWidth * 0.42;
+                if (s.kneePatch === 1) {
+                    ctx.strokeStyle = s.pantsColor.stripe;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(centerX - kw, kneeY + 6);
+                    ctx.lineTo(centerX + kw, kneeY + 6);
+                    ctx.stroke();
+                } else if (s.kneePatch === 2) {
+                    ctx.fillStyle = s.pantsColor.light;
+                    ctx.strokeStyle = s.pantsColor.dark;
+                    ctx.lineWidth = 2;
+                    drawRoundRect(ctx, centerX - kw, kneeY - 4, kw * 2, 26, 6);
+                    ctx.fill();
                     ctx.stroke();
                 }
 
@@ -1672,10 +1697,27 @@
                     ctx.fillStyle = s.pantsColor.light;
                     ctx.strokeStyle = "#000000";
                     ctx.lineWidth = 2.5;
-                    ctx.fillRect(Math.min(cuffInnerX, cuffOuterX) - 1, ankleY - 11, cuffWidth + 2, 11);
-                    ctx.strokeRect(Math.min(cuffInnerX, cuffOuterX) - 1, ankleY - 11, cuffWidth + 2, 11);
+                    ctx.fillRect(Math.min(cuffInnerX, cuffOuterX) - 1, hemY - 11, cuffWidth + 2, 11);
+                    ctx.strokeRect(Math.min(cuffInnerX, cuffOuterX) - 1, hemY - 11, cuffWidth + 2, 11);
                 }
             });
+
+            // 가짜 라벨 함정 (실제 폭과 무관, 50%만 맞음)
+            if (s.fakeLabel) {
+                ctx.save();
+                ctx.fillStyle = "#FFFFFF";
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 2;
+                drawRoundRect(ctx, -70, -80, 40, 18, 4);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = "#111827";
+                ctx.font = "900 11px 'Black Han Sans', sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(s.fakeLabel, -50, -71);
+                ctx.restore();
+            }
 
             // 3) 골반 & 엉덩이 실루엣
             ctx.fillStyle = s.pantsColor.main;
@@ -2231,7 +2273,7 @@
         function drawInchRulerOverlay(ctx, s, reveal) {
             const cuffWidth = 46 + (s.inches - 7.8) * 7.2;
             const centerX = 62;
-            const y = 95;
+            const y = 95 + (s.hemDrop || 0);
 
             ctx.save();
             ctx.strokeStyle = reveal.isCorrect ? "#16A34A" : "#DC2626";
@@ -2481,6 +2523,7 @@
                 b.perfectCount = 0;
             }
 
+            dmgScore *= SCORE_MULT;
             state.score += dmgScore;
             if (grade !== "MISS") state.totalSlaps++;
             state.hitStopTimer = grade === "PERFECT" ? 0.095 : grade === "MISS" ? 0.025 : 0.065;
@@ -2529,8 +2572,8 @@
                 // 3연타 모두 PERFECT 달성 시 보너스 3,000점!
                 let perfectBonusText = "";
                 if (b.perfectCount === 3) {
-                    state.score += 3000;
-                    perfectBonusText = " · 👑 올 퍼펙트 +3,000점!!";
+                    state.score += 3000 * SCORE_MULT;
+                    perfectBonusText = ` · 👑 올 퍼펙트 +${(3000 * SCORE_MULT).toLocaleString()}점!!`;
                 }
 
                 showFloatingFeedback(
@@ -2666,7 +2709,7 @@
                 const isFever = state.combo >= 10;
                 const multiplier = isFever ? 2 : 1;
                 const comboBonus = Math.min(state.combo * 25, 250);
-                const gainedPoints = (150 + comboBonus) * multiplier;
+                const gainedPoints = (150 + comboBonus) * multiplier * SCORE_MULT;
 
                 state.score += gainedPoints;
                 state.stageScoreEarned += gainedPoints;
@@ -3035,7 +3078,7 @@
             sfx.playClear();
 
             const stage = STAGES[state.stageIndex] || STAGES[STAGES.length - 1];
-            const timeBonus = Math.round(state.timeLeft * 30);
+            const timeBonus = Math.round(state.timeLeft * 30 * SCORE_MULT);
             state.score += timeBonus;
 
             if (state.stageIndex >= STAGES.length - 1) {
